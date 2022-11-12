@@ -1,8 +1,8 @@
 use bevy::{math::vec3, prelude::*};
 
+use bevy_easings::EasingsPlugin;
 use bevy_rapier2d::prelude::*;
 use enemy::{EnemyPlugin, SpawnWaveEvent};
-mod main_menu;
 use main_menu::MainMenuPlugin;
 
 use gadget::GadgetPlugin;
@@ -12,11 +12,11 @@ use level::LevelPlugin;
 use pathfinding::PathfindingPlugin;
 
 mod enemy;
-mod level;
-mod pathfinding;
-
 mod gadget;
 mod input;
+mod level;
+mod main_menu;
+mod pathfinding;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 enum AppState {
@@ -27,9 +27,8 @@ enum AppState {
 #[derive(Component)]
 pub struct MainCamera;
 
-const PIXELS_PER_METER: f32 = 100.0;
-
 const WORLD_SIZE: (f32, f32) = (3400.0, 2000.0);
+const PIXELS_PER_METER: f32 = 100.0;
 
 fn main() {
     App::new()
@@ -41,6 +40,7 @@ fn main() {
         .add_plugin(GadgetPlugin)
         .add_plugin(EnemyPlugin)
         .add_plugin(GameInputPlugin)
+        .add_plugin(EasingsPlugin)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(
             PIXELS_PER_METER,
         ))

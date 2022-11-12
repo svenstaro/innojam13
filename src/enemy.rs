@@ -1,4 +1,7 @@
-use bevy::prelude::*;
+use std::time::Duration;
+
+use bevy::{math::vec2, prelude::*};
+use bevy_easings::{Ease, EaseFunction, EasingType};
 use bevy_rapier2d::prelude::*;
 
 pub struct EnemyPlugin;
@@ -94,12 +97,29 @@ fn spawn_enemy_at(commands: &mut Commands, asset_server: &Res<AssetServer>, pos:
         .insert(EnemyType::Grunt)
         .insert(PathfindingAgent::new(10.0))
         .insert_bundle(SpriteBundle {
-            texture: asset_server.load("enemies/grunt.png"),
             sprite: Sprite {
                 custom_size: Some(Vec2::splat(1.0)),
                 ..default()
             },
+            texture: asset_server.load("enemies/grunt.png"),
             transform: Transform::from_scale(Vec3::new(size, size, 1.0)).with_translation(pos),
             ..default()
-        });
+        })
+        .insert(
+            Sprite {
+                custom_size: Some(Vec2::splat(1.0)),
+                ..default()
+            }
+            .ease_to(
+                Sprite {
+                    custom_size: Some(vec2(1.3, 0.7)),
+                    ..default()
+                },
+                EaseFunction::CubicInOut,
+                EasingType::PingPong {
+                    duration: Duration::from_millis(500),
+                    pause: Some(Duration::from_millis(70)),
+                },
+            ),
+        );
 }
