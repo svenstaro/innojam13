@@ -47,6 +47,7 @@ fn root() -> NodeBundle {
             align_items: AlignItems::Center,
             ..Default::default()
         },
+        color: UiColor(Color::hex("0C1E21").unwrap()),
         ..Default::default()
     }
 }
@@ -54,11 +55,11 @@ fn root() -> NodeBundle {
 fn border() -> NodeBundle {
     NodeBundle {
         style: Style {
-            size: Size::new(Val::Px(400.0), Val::Auto),
-            border: UiRect::all(Val::Px(8.0)),
+            size: Size::new(Val::Px(800.0), Val::Auto),
+            border: UiRect::all(Val::Px(0.0)),
             ..Default::default()
         },
-        color: UiColor(Color::RED),
+        color: UiColor(Color::hex("27373B").unwrap()),
         ..Default::default()
     }
 }
@@ -70,9 +71,10 @@ fn menu_background() -> NodeBundle {
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
             flex_direction: FlexDirection::ColumnReverse,
-            padding: UiRect::all(Val::Px(5.0)),
+            // padding: UiRect::all(Val::Px(5.0)),
             ..Default::default()
         },
+        color: UiColor(Color::hex("0C1E21").unwrap()),
         ..Default::default()
     }
 }
@@ -83,8 +85,10 @@ fn button() -> ButtonBundle {
             size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
+            margin: UiRect::all(Val::Px(20.0)),
             ..Default::default()
         },
+        color: UiColor(Color::hex("45A7BA").unwrap()),
         ..Default::default()
     }
 }
@@ -98,9 +102,9 @@ fn button_text(asset_server: &Res<AssetServer>, label: &str) -> TextBundle {
         text: Text::from_section(
             label,
             TextStyle {
-                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                font_size: 30.0,
-                color: Color::BLACK,
+                font: asset_server.load("fonts/Oswald-SemiBold.ttf"),
+                font_size: 70.0,
+                color: Color::hex("0C1E21").unwrap(),
             },
         ),
         ..Default::default()
@@ -145,5 +149,4 @@ fn setup(
 
 fn cleanup(mut commands: Commands, menu_data: Res<MainMenuData>) {
     commands.entity(menu_data.ui_root).despawn_recursive();
-    // commands.entity(menu_data.camera_entity).despawn_recursive();
 }
