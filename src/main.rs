@@ -18,6 +18,8 @@ struct MainCamera;
 
 const PIXELS_PER_METER: f32 = 100.0;
 
+const WORLD_SIZE: (f32, f32) = (3400.0, 2000.0);
+
 fn main() {
     App::new()
         .add_event::<SpawnWaveEvent>()
@@ -45,8 +47,8 @@ fn setup_graphics(mut commands: Commands) {
         .spawn_bundle(Camera2dBundle {
             projection: OrthographicProjection {
                 scaling_mode: bevy::render::camera::ScalingMode::Auto {
-                    min_width: 3400.0,
-                    min_height: 2000.0,
+                    min_width: WORLD_SIZE.0,
+                    min_height: WORLD_SIZE.1,
                 },
                 ..default()
             },
