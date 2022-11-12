@@ -1,11 +1,10 @@
-use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
+use bevy::{prelude::*, render::camera::RenderTarget, sprite::MaterialMesh2dBundle};
 
 use bevy_rapier2d::prelude::*;
-use pathfinding::{PathfindingPlugin, PathfindingAgent};
+use pathfinding::{PathfindingAgent, PathfindingPlugin};
 use rand::Rng;
 
 mod pathfinding;
-
 
 #[derive(Debug, Default, Component)]
 struct Fountain;
@@ -27,6 +26,9 @@ enum EnemyType {
 
 #[derive(Component, Debug, Default)]
 struct Enemy;
+
+#[derive(Component)]
+struct MainCamera;
 
 const PIXELS_PER_METER: f32 = 100.0;
 
@@ -63,9 +65,8 @@ fn setup_graphics(mut commands: Commands) {
                 ..default()
             },
             ..default()
-        },
-        ..default()
-    });
+        })
+        .insert(MainCamera);
 }
 
 fn setup_map(mut commands: Commands, windows: Res<Windows>) {
@@ -128,17 +129,52 @@ fn setup_map(mut commands: Commands, windows: Res<Windows>) {
     //     .insert_bundle(TransformBundle::from(Transform::from_xyz(0.0, 400.0, 0.0)));
 }
 
+fn get_world_cursor_pos(
+    windows: Res<Windows>,
+    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+) -> Option<Vec2> {
+    // get the camera info and transform
+    // assuming there is exactly one main camera entity, so query::single() is OK
+    let (camera, camera_transform) = camera_q.single();
+
+    // get the window that the camera is displaying to (or the primary window)
+    let window = if let RenderTarget::Window(id) = camera.target {
+        windows.get(id).unwrap()
+    } else {
+        windows.get_primary().unwrap()
+    };
+
+    // check if the cursor is inside the window and get its position
+    if let Some(screen_pos) = window.cursor_position() {
+        // get the size of the window
+        let window_size = Vec2::new(window.width() as f32, window.height() as f32);
+
+        // convert screen position [0..resolution] to ndc [-1..1] (gpu coordinates)
+        let ndc = (screen_pos / window_size) * 2.0 - Vec2::ONE;
+
+        // matrix for undoing the projection and camera transform
+        let ndc_to_world = camera_transform.compute_matrix() * camera.projection_matrix().inverse();
+
+        // use it to convert ndc to world-space coordinates
+        let world_pos = ndc_to_world.project_point3(ndc.extend(-1.0));
+
+        // reduce it to a 2D value
+        Some(world_pos.truncate())
+    } else {
+        None
+    }
+}
+
 fn shoot_water(
     buttons: Res<Input<MouseButton>>,
     windows: Res<Windows>,
+    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut commands: Commands,
 ) {
     if buttons.pressed(MouseButton::Left) {
-        let window = windows.get_primary().unwrap();
-
-        if let Some(position) = window.cursor_position() {
+        if let Some(position) = get_world_cursor_pos(windows, camera_q) {
             commands
                 .spawn()
                 .insert(RigidBody::Dynamic)
@@ -150,12 +186,8 @@ fn shoot_water(
                 })
                 .insert_bundle(MaterialMesh2dBundle {
                     mesh: meshes.add(Mesh::from(shape::Circle::default())).into(),
-                    transform: Transform::from_xyz(
-                        position.x - window.width() / 2.0,
-                        position.y - window.height() / 2.0,
-                        0.0,
-                    )
-                    .with_scale(Vec3::splat(10.)),
+                    transform: Transform::from_xyz(position.x, position.y, 0.0)
+                        .with_scale(Vec3::splat(10.)),
                     material: materials.add(ColorMaterial::from(Color::BLUE)),
                     ..default()
                 });
@@ -220,12 +252,11 @@ fn spawn_new_wave_on_event(
             .insert(PathfindingAgent::new(10.0))
             .insert_bundle(SpriteBundle {
                 texture: asset_server.load("enemies/grunt.png"),
-                transform: Transform::from_scale(Vec3::new(0.2, 0.2, 1.0)),
+                transform: Transform::from_scale(Vec3::new(0.5, 0.5, 1.0)),
                 ..default()
             });
     }
 }
-
 
 fn fountain_spawns_things(
     mut fountain_query: Query<&Transform, With<Fountain>>,
@@ -254,9 +285,8 @@ fn fountain_spawns_things(
             .insert(PathfindingAgent::new(10.0))
             .insert_bundle(SpriteBundle {
                 texture: asset_server.load("enemies/grunt.png"),
-                transform: Transform::from_scale(Vec3::new(0.2, 0.2, 1.0)),
+                transform: Transform::from_scale(Vec3::new(0.5, 0.5, 1.0)),
                 ..default()
             });
     }
 }
-
