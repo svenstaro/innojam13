@@ -5,7 +5,8 @@ pub struct PathfindingPlugin;
 
 #[derive(Component)]
 pub struct PathfindingAgent {
-    move_strength: f32
+    move_strength: f32,
+    current_idx: usize
 }
 
 #[derive(Default)]
@@ -15,7 +16,7 @@ struct Navmesh {
 
 impl PathfindingAgent {
     pub fn new(move_strength: f32) -> Self {
-        PathfindingAgent { move_strength }
+        PathfindingAgent { move_strength, current_idx: 0 }
     }
 }
 
@@ -31,8 +32,10 @@ impl Navmesh {
 
             let steps = (dist * density_npu) as usize;
 
+
             for step_nr in 0..steps {
-                let t = steps as f32 / step_nr as f32;
+                let t = step_nr as f32 / steps as f32;
+                dbg!(t);
                 let new_node = last_node.lerp(next_node, t);
                 nodes.push(new_node);
             }
@@ -59,37 +62,37 @@ fn init_nav_mesh_debug(
     };
 }
 
-fn update_pathfinding_agent(mut commands: Commands, mut agent_query: Query<(&Transform, &PathfindingAgent, &mut ExternalForce), With<PathfindingAgent>>, navmesh: Res<Navmesh>) {
-    for (agent_transform, agent, mut agent_move_force) in agent_query.iter_mut() {
-        agent_move_force.force = get_force_from_navmesh(agent_transform.translation, &navmesh, agent.move_strength);
+fn update_pathfinding_agent(mut commands: Commands, mut agent_query: Query<(&Transform, &mut PathfindingAgent, &mut ExternalForce), With<PathfindingAgent>>, navmesh: Res<Navmesh>) {
+    for (agent_transform, mut agent, mut agent_move_force) in agent_query.iter_mut() {
+        agent_move_force.force = get_force_from_navmesh(agent_transform.translation, &navmesh, &mut agent);
     }
 }
 
 
-fn get_force_from_navmesh(sample_position: Vec3, navmesh: &Navmesh, move_strength: f32) -> Vec2 {
+fn get_force_from_navmesh(sample_position: Vec3, navmesh: &Navmesh, agent: &mut PathfindingAgent) -> Vec2 {
     let sample_position = sample_position.truncate();
-    let mut min_dist = f32::MAX;
-    let mut force = Vec2::ZERO;
-    for node in navmesh.nodes.iter() {
-        let dist = sample_position.distance(*node);
-        if dist < min_dist {
-            min_dist = dist;
-            force = (*node - sample_position).normalize() * move_strength;
+
+    loop {
+
+        let current_node = navmesh.nodes[agent.current_idx];
+        let dir = current_node - sample_position;
+        let dist = current_node.distance(sample_position);
+        
+        if dist < 5.0 {
+            agent.current_idx = (agent.current_idx + 1 ).min(navmesh.nodes.len() - 1); 
+            continue;
         }
+        return dir.normalize() * agent.move_strength;
     }
-    force
 }
 
 impl Plugin for PathfindingPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(Navmesh::generate(
             vec![
-                Vec2::new(0.0, 0.0),
-                Vec2::new(10.0, 0.0),
-                Vec2::new(20.0, 0.0),
-                Vec2::new(30.0, 0.0),
-                Vec2::new(40.0, 10.0),
-                Vec2::new(30.0, 10.0),
+                Vec2::new(-130.0, -170.0),
+                Vec2::new(130.0, -170.0)
+               
             ],
             0.1,
         ));
