@@ -8,6 +8,7 @@ resolver = "2"
 bevy = "0.8"
 bevy_rapier2d = { version = "0.18", features = [ "simd-stable", "debug-render" ] }
 rand = "0.8.5"
+bevy_easings = "0.8"
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]

@@ -1,5 +1,6 @@
-use bevy::{prelude::*, render::camera::RenderTarget, sprite::MaterialMesh2dBundle};
+use bevy::{math::vec2, prelude::*, render::camera::RenderTarget, sprite::MaterialMesh2dBundle};
 
+use bevy_easings::EasingsPlugin;
 use bevy_rapier2d::prelude::*;
 use level::{Fountain, LevelPlugin};
 use pathfinding::{PathfindingAgent, PathfindingPlugin};
@@ -31,9 +32,10 @@ const PIXELS_PER_METER: f32 = 100.0;
 fn main() {
     App::new()
         .add_event::<SpawnWaveEvent>()
+        .add_plugins(DefaultPlugins)
+        .add_plugin(EasingsPlugin)
         .add_plugin(PathfindingPlugin)
         .add_plugin(LevelPlugin)
-        .add_plugins(DefaultPlugins)
         .add_system(bevy::window::close_on_esc)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(
             PIXELS_PER_METER,
