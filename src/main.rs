@@ -85,7 +85,7 @@ fn setup_map(mut commands: Commands, windows: Res<Windows>) {
 
     let fountain = Collider::cuboid(50.0, 50.0);
     let fountain_offset = Transform::from_xyz(
-        window_width / 2.0 - 50.0 - 10.0,
+        -(window_width / 2.0 - 50.0 - 10.0),
         -window_height / 2.0 + 100.0 + 50.0 + 10.0,
         0.0,
     );
@@ -97,7 +97,7 @@ fn setup_map(mut commands: Commands, windows: Res<Windows>) {
 
     let base = Collider::cuboid(50.0, 50.0);
     let base_offset = Transform::from_xyz(
-        -(window_width / 2.0 - 50.0 - 10.0),
+        window_width / 2.0 - 50.0 - 10.0,
         -window_height / 2.0 + 100.0 + 50.0 + 10.0,
         0.0,
     );
@@ -199,7 +199,7 @@ fn spawn_new_wave_on_event(
         commands
             .spawn()
             .insert(RigidBody::Dynamic)
-            .insert(Collider::ball(10.0))
+            .insert(Collider::ball(50.0))
             // .insert(CollisionGroups::new(0b0001.into(), 0b0001.into())
             // .insert(SolverGroups::new(0b0001.into(), 0b0010.into());
             .insert(Damping {
@@ -217,6 +217,7 @@ fn spawn_new_wave_on_event(
             .insert(PathfindingAgent::new(10.0))
             .insert_bundle(SpriteBundle {
                 texture: asset_server.load("enemies/grunt.png"),
+                transform: Transform::from_scale(Vec3::new(0.2, 0.2, 1.0)),
                 ..default()
             });
     }
@@ -224,17 +225,16 @@ fn spawn_new_wave_on_event(
 
 
 fn fountain_spawns_things(
-    mut fountain_query: Query<(&Transform), With<Fountain>>,
+    mut fountain_query: Query<&Transform, With<Fountain>>,
     mut commands: Commands,
     asset_server: Res<AssetServer>,
 ) {
     let &fountain_transform = fountain_query.iter_mut().next().clone().unwrap();
-
     if rand_f32(0.0, 1.0) > 0.95 {
         commands
             .spawn()
             .insert(RigidBody::Dynamic)
-            .insert(Collider::ball(10.0))
+            .insert(Collider::ball(50.0))
             // .insert(CollisionGroups::new(0b0001.into(), 0b0001.into())
             // .insert(SolverGroups::new(0b0001.into(), 0b0010.into());
             .insert(Damping {
@@ -251,6 +251,7 @@ fn fountain_spawns_things(
             .insert(PathfindingAgent::new(10.0))
             .insert_bundle(SpriteBundle {
                 texture: asset_server.load("enemies/grunt.png"),
+                transform: Transform::from_scale(Vec3::new(0.2, 0.2, 1.0)),
                 ..default()
             });
     }
