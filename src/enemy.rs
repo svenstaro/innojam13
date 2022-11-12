@@ -5,7 +5,7 @@ pub struct EnemyPlugin;
 
 use rand::Rng;
 
-use crate::{pathfinding::PathfindingAgent, level::Fountain};
+use crate::{level::Fountain, pathfinding::PathfindingAgent};
 
 #[derive(Debug, Default)]
 pub struct SpawnWaveEvent;
@@ -16,10 +16,9 @@ fn rand_f32(l: f32, u: f32) -> f32 {
 
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
-        app
-        .add_system(spawn_new_wave_on_event)
-        // Enemy processes.
-        .add_system(fountain_spawns_things);
+        app.add_system(spawn_new_wave_on_event)
+            // Enemy processes.
+            .add_system(fountain_spawns_things);
     }
 }
 
@@ -37,7 +36,6 @@ struct Enemy;
 
 fn spawn_new_wave_on_event(
     spawn_wave_events: EventReader<SpawnWaveEvent>,
-    windows: Res<Windows>,
     mut commands: Commands,
     asset_server: Res<AssetServer>,
 ) {
@@ -49,12 +47,10 @@ fn spawn_new_wave_on_event(
     // This prevents events staying active on the next frame.
     spawn_wave_events.clear();
 
-    let _window = windows.get_primary().unwrap();
-
     let wave_size = 10;
 
     for _ in 0..wave_size {
-        let base_pos = Vec3::new(0.0, 0.0, 0.0);
+        let base_pos = Vec3::new(1000.0, 500.0, 0.0);
         let offset = Vec3::new(rand_f32(-50.0, 50.0), rand_f32(-50.0, 50.0), 0.0);
         let pos = base_pos + offset;
 
@@ -67,10 +63,10 @@ fn fountain_spawns_things(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
 ) {
-    let &fountain_transform = fountain_query.iter_mut().next().clone().unwrap();
-    if rand_f32(0.0, 1.0) > 0.95 {
-        spawn_enemy_at(&mut commands, &asset_server, fountain_transform.translation);
-    }
+    // let &fountain_transform = fountain_query.iter_mut().next().clone().unwrap();
+    // if rand_f32(0.0, 1.0) > 0.95 {
+    //     spawn_enemy_at(&mut commands, &asset_server, fountain_transform.translation);
+    // }
 }
 
 fn spawn_enemy_at(commands: &mut Commands, asset_server: &Res<AssetServer>, pos: Vec3) {
