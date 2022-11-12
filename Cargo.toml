@@ -4,7 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-macroquad = "0.3"
+bevy = "0.8"
+bevy_rapier2d = { version = "0.18", features = [ "simd-stable", "debug-render", "parallel" ] }
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]
