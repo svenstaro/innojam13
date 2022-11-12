@@ -1,4 +1,4 @@
-use bevy::{math::vec3, prelude::*};
+use bevy::{math::vec3, prelude::*, render::texture::ImageSettings};
 
 use bevy_easings::EasingsPlugin;
 use bevy_rapier2d::prelude::*;
@@ -17,6 +17,7 @@ mod input;
 mod level;
 mod main_menu;
 mod pathfinding;
+mod animations;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 enum AppState {
@@ -32,6 +33,7 @@ const PIXELS_PER_METER: f32 = 100.0;
 
 fn main() {
     App::new()
+        .insert_resource(ImageSettings::default_nearest())
         .add_event::<SpawnWaveEvent>()
         .add_plugins(DefaultPlugins)
         .add_plugin(MainMenuPlugin)
@@ -49,6 +51,8 @@ fn main() {
         // Input handler systems.
         .add_state(AppState::MainMenu)
         .add_system(main_menu_controls)
+        .add_startup_system(animations::sprite_setup)
+        .add_system(animations::animate_sprite)
         .run();
 }
 
