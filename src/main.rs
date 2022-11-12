@@ -135,10 +135,6 @@ fn shoot_water(
                 .insert(RigidBody::Dynamic)
                 .insert(Collider::ball(0.5))
                 .insert(Restitution::coefficient(0.1))
-                .insert(Damping {
-                    linear_damping: 1.0,
-                    angular_damping: 0.1,
-                })
                 .insert(ExternalImpulse {
                     impulse: Vec2::new(5.0, -5.0),
                     torque_impulse: 0.0,
