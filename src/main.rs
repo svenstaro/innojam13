@@ -41,8 +41,6 @@ fn main() {
         .add_plugin(RapierDebugRenderPlugin::default())
         .add_startup_system(setup_graphics)
         .add_startup_system(setup_map)
-        // Rendering?
-        .add_system(print_ball_altitude)
         // Input handler systems.
         .add_system(shoot_water)
         .add_system(debug_keymap)
@@ -55,7 +53,16 @@ fn main() {
 
 fn setup_graphics(mut commands: Commands) {
     // Add a camera so we can see the debug-render.
-    commands.spawn_bundle(Camera2dBundle::default());
+    commands.spawn_bundle(Camera2dBundle {
+        projection: OrthographicProjection {
+            scaling_mode: bevy::render::camera::ScalingMode::Auto {
+                min_width: 10000.0,
+                min_height: 6000.0,
+            },
+            ..default()
+        },
+        ..default()
+    });
 }
 
 fn setup_map(mut commands: Commands, windows: Res<Windows>) {
@@ -116,12 +123,6 @@ fn setup_map(mut commands: Commands, windows: Res<Windows>) {
     //     .insert(Collider::ball(50.0))
     //     .insert(Restitution::coefficient(0.7))
     //     .insert_bundle(TransformBundle::from(Transform::from_xyz(0.0, 400.0, 0.0)));
-}
-
-fn print_ball_altitude(_positions: Query<&Transform, With<RigidBody>>) {
-    // for transform in positions.iter() {
-    //     println!("Ball altitude: {}", transform.translation.y);
-    // }
 }
 
 fn shoot_water(
@@ -228,7 +229,6 @@ fn fountain_spawns_things(
     asset_server: Res<AssetServer>,
 ) {
     let &fountain_transform = fountain_query.iter_mut().next().clone().unwrap();
-    println!("{:?}", fountain_transform);
 
     if rand_f32(0.0, 1.0) > 0.95 {
         commands
