@@ -37,6 +37,7 @@ fn main() {
         .add_event::<SpawnWaveEvent>()
         .add_plugin(PathfindingPlugin)
         .add_plugins(DefaultPlugins)
+        .add_system(bevy::window::close_on_esc)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(
             PIXELS_PER_METER,
         ))
