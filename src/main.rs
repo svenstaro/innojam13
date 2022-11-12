@@ -54,13 +54,21 @@ fn main() {
 }
 
 fn setup_graphics(mut commands: Commands) {
+    // let mut  bundle = Camera2dBundle::new_with_far(1000.0);
+    // bundle.projection = projection: OrthographicProjection {
+    //     scaling_mode: bevy::render::camera::ScalingMode::Auto {
+    //         min_width: WORLD_SIZE.0,
+    //         min_height: WORLD_SIZE.1,
+    //     },
+    //     ..default()
+    // },
     // Add a camera so we can see the debug-render.
     commands
         .spawn_bundle(Camera2dBundle {
-            transform: Transform::from_translation(vec3(
+            transform:  Transform::from_translation(vec3(
                 WORLD_SIZE.0 / 2.0,
                 WORLD_SIZE.1 / 2.0,
-                0.0,
+                2.0,
             )),
             projection: OrthographicProjection {
                 scaling_mode: bevy::render::camera::ScalingMode::Auto {
