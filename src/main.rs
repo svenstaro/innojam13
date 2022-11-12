@@ -1,6 +1,11 @@
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
+
 use bevy_rapier2d::prelude::*;
+use pathfinding::{PathfindingPlugin, PathfindingAgent};
 use rand::Rng;
+
+mod pathfinding;
+
 
 #[derive(Debug, Default, Component)]
 struct Fountain;
@@ -28,6 +33,7 @@ const PIXELS_PER_METER: f32 = 100.0;
 fn main() {
     App::new()
         .add_event::<SpawnWaveEvent>()
+        .add_plugin(PathfindingPlugin)
         .add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(
             PIXELS_PER_METER,
@@ -44,7 +50,6 @@ fn main() {
         .add_system(spawn_new_wave_on_event)
         // Enemy processes.
         .add_system(fountain_spawns_things)
-        .add_system(enemy_pathfinding)
         .run();
 }
 
@@ -204,6 +209,7 @@ fn spawn_new_wave_on_event(
                 force: Vec2::new(0.0, 0.0),
                 torque: 0.0,
             })
+            .insert(PathfindingAgent::new(10.0))
             .insert_bundle(TransformBundle::from(transform))
             .insert(Enemy)
             .insert(EnemyType::Grunt)
@@ -214,18 +220,6 @@ fn spawn_new_wave_on_event(
     }
 }
 
-fn enemy_pathfinding(
-    mut enemy_query: Query<(&EnemyType, &mut ExternalForce, &Transform), With<Enemy>>,
-) {
-    // TODO get target and/or map (to compute a* or something....)
-    let target = Vec2::new(500.0, 500.0);
-    for (_enemy_type, mut ext_force, transform) in enemy_query.iter_mut() {
-        let direction = target - transform.translation.truncate();
-
-        // TODO switch by enemy type
-        ext_force.force = direction.normalize() * 5.0;
-    }
-}
 
 fn fountain_spawns_things(
     mut fountain_query: Query<(&Transform), With<Fountain>>,
@@ -259,3 +253,4 @@ fn fountain_spawns_things(
             });
     }
 }
+
