@@ -3,6 +3,7 @@ use bevy::{math::vec3, prelude::*};
 use bevy_easings::EasingsPlugin;
 use bevy_rapier2d::prelude::*;
 use enemy::{EnemyPlugin, SpawnWaveEvent};
+use game_state::{AppState, GameStatePlugin};
 use main_menu::MainMenuPlugin;
 
 use gadget::GadgetPlugin;
@@ -12,19 +13,14 @@ use level::LevelPlugin;
 use pathfinding::PathfindingPlugin;
 
 mod enemy;
+mod game_state;
+mod level;
+mod pathfinding;
 mod gadget;
 mod input;
-mod level;
 mod main_menu;
-mod pathfinding;
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-enum AppState {
-    MainMenu,
-    InGame,
-}
-
-#[derive(Component)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Component)]
 pub struct MainCamera;
 
 const WORLD_SIZE: (f32, f32) = (3400.0, 2000.0);
@@ -45,26 +41,9 @@ fn main() {
             PIXELS_PER_METER,
         ))
         .add_plugin(RapierDebugRenderPlugin::default())
+        .add_plugin(GameStatePlugin)
         .add_startup_system(setup_graphics)
-        // Input handler systems.
-        .add_state(AppState::MainMenu)
-        .add_system(main_menu_controls)
         .run();
-}
-
-fn main_menu_controls(mut keys: ResMut<Input<KeyCode>>, mut app_state: ResMut<State<AppState>>) {
-    if *app_state.current() == AppState::MainMenu {
-        if keys.just_pressed(KeyCode::Return) {
-            app_state.set(AppState::InGame).unwrap();
-            keys.reset(KeyCode::Return);
-        }
-    } else {
-        if keys.just_pressed(KeyCode::Escape) {
-            app_state.set(AppState::MainMenu).unwrap();
-            // still needed?
-            keys.reset(KeyCode::Escape);
-        }
-    }
 }
 
 fn setup_graphics(mut commands: Commands) {

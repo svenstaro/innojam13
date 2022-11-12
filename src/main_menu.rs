@@ -3,8 +3,8 @@ use bevy::{app::AppExit, prelude::*};
 
 pub struct MainMenuPlugin;
 
+#[derive(Component, Debug)]
 struct MainMenuData {
-    // camera_entity: Entity,
     ui_root: Entity,
 }
 
@@ -35,7 +35,8 @@ impl Plugin for MainMenuPlugin {
     fn build(&self, app: &mut App) {
         app.add_system(button_press_system)
             .add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(setup))
-            .add_system_set(SystemSet::on_exit(AppState::MainMenu).with_system(cleanup));
+            .add_system_set(SystemSet::on_exit(AppState::MainMenu).with_system(cleanup))
+            .add_system(main_menu_controls);
     }
 }
 
@@ -149,4 +150,20 @@ fn setup(
 
 fn cleanup(mut commands: Commands, menu_data: Res<MainMenuData>) {
     commands.entity(menu_data.ui_root).despawn_recursive();
+}
+
+fn main_menu_controls(mut keys: ResMut<Input<KeyCode>>, mut app_state: ResMut<State<AppState>>) {
+    if *app_state.current() == AppState::MainMenu {
+        if keys.just_pressed(KeyCode::Return) {
+            app_state.set(AppState::InGame).unwrap();
+            keys.reset(KeyCode::Return);
+        }
+    } else {
+        if keys.just_pressed(KeyCode::Escape) {
+            //set some state to add continue button
+            app_state.set(AppState::MainMenu).unwrap();
+            // still needed?
+            keys.reset(KeyCode::Escape);
+        }
+    }
 }
