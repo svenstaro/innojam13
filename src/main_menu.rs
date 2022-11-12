@@ -1,5 +1,6 @@
-use super::AppState;
 use bevy::{app::AppExit, prelude::*};
+
+use crate::AppState;
 
 pub struct MainMenuPlugin;
 
@@ -23,8 +24,8 @@ fn button_press_system(
         if *interaction == Interaction::Clicked {
             match button {
                 MenuButton::Play => state
-                    .set(AppState::InGame)
-                    .expect("Couldn't switch state to InGame"),
+                    .set(AppState::Build)
+                    .expect("Couldn't switch state to Build"),
                 MenuButton::Quit => exit.send(AppExit),
             };
         }
@@ -33,10 +34,12 @@ fn button_press_system(
 
 impl Plugin for MainMenuPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(button_press_system)
-            .add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(setup))
-            .add_system_set(SystemSet::on_exit(AppState::MainMenu).with_system(cleanup))
-            .add_system(main_menu_controls);
+        app.add_system_set(
+            SystemSet::on_update(AppState::MainMenu).with_system(button_press_system),
+        )
+        .add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(setup))
+        .add_system_set(SystemSet::on_exit(AppState::MainMenu).with_system(cleanup))
+        .add_system(main_menu_controls);
     }
 }
 
@@ -148,7 +151,7 @@ fn cleanup(mut commands: Commands, menu_data: Res<MainMenuData>) {
 fn main_menu_controls(mut keys: ResMut<Input<KeyCode>>, mut app_state: ResMut<State<AppState>>) {
     if *app_state.current() == AppState::MainMenu {
         if keys.just_pressed(KeyCode::Return) {
-            app_state.set(AppState::InGame).unwrap();
+            app_state.set(AppState::Build).unwrap();
             keys.reset(KeyCode::Return);
         }
     } else {

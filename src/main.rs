@@ -1,7 +1,9 @@
+use attack_state::AttackStatePlugin;
 use bevy::{math::vec3, prelude::*};
 
 use bevy_easings::EasingsPlugin;
 use bevy_rapier2d::prelude::*;
+use build_state::BuildStatePlugin;
 use enemy::{EnemyPlugin, SpawnWaveEvent};
 use game_state::{AppState, GameStatePlugin};
 use main_menu::MainMenuPlugin;
@@ -12,6 +14,8 @@ use input::InputPlugin as GameInputPlugin;
 use level::LevelPlugin;
 use pathfinding::PathfindingPlugin;
 
+mod attack_state;
+mod build_state;
 mod enemy;
 mod gadget;
 mod game_state;
@@ -31,7 +35,6 @@ fn main() {
         .insert_resource(Msaa { samples: 1 })
         .add_event::<SpawnWaveEvent>()
         .add_plugins(DefaultPlugins)
-        .add_plugin(MainMenuPlugin)
         .add_plugin(PathfindingPlugin)
         .add_plugin(LevelPlugin)
         .add_plugin(GadgetPlugin)
@@ -43,6 +46,9 @@ fn main() {
         ))
         .add_plugin(RapierDebugRenderPlugin::default())
         .add_plugin(GameStatePlugin)
+        .add_plugin(MainMenuPlugin)
+        .add_plugin(BuildStatePlugin)
+        .add_plugin(AttackStatePlugin)
         .add_startup_system(setup_graphics)
         .run();
 }
