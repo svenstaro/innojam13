@@ -72,7 +72,6 @@ fn menu_background() -> NodeBundle {
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
             flex_direction: FlexDirection::ColumnReverse,
-            // padding: UiRect::all(Val::Px(5.0)),
             ..Default::default()
         },
         color: UiColor(Color::hex("0C1E21").unwrap()),
@@ -112,13 +111,7 @@ fn button_text(asset_server: &Res<AssetServer>, label: &str) -> TextBundle {
     };
 }
 
-fn setup(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    // camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-) {
-    // let camera_entity = commands.spawn_bundle(Camera2dBundle::default()).id();
-
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let ui_root = commands
         .spawn_bundle(root())
         .with_children(|parent| {

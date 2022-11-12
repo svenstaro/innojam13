@@ -13,12 +13,12 @@ use level::LevelPlugin;
 use pathfinding::PathfindingPlugin;
 
 mod enemy;
-mod game_state;
-mod level;
-mod pathfinding;
 mod gadget;
+mod game_state;
 mod input;
+mod level;
 mod main_menu;
+mod pathfinding;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Component)]
 pub struct MainCamera;
@@ -28,6 +28,7 @@ const PIXELS_PER_METER: f32 = 100.0;
 
 fn main() {
     App::new()
+        .insert_resource(Msaa { samples: 1 })
         .add_event::<SpawnWaveEvent>()
         .add_plugins(DefaultPlugins)
         .add_plugin(MainMenuPlugin)
