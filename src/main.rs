@@ -213,6 +213,7 @@ fn spawn_new_wave_on_event(
             .insert_bundle(TransformBundle::from(transform))
             .insert(Enemy)
             .insert(EnemyType::Grunt)
+            .insert(PathfindingAgent::new(10.0))
             .insert_bundle(SpriteBundle {
                 texture: asset_server.load("enemies/grunt.png"),
                 ..default()
@@ -247,6 +248,7 @@ fn fountain_spawns_things(
             .insert_bundle(TransformBundle::from(fountain_transform))
             .insert(Enemy)
             .insert(EnemyType::Grunt)
+            .insert(PathfindingAgent::new(10.0))
             .insert_bundle(SpriteBundle {
                 texture: asset_server.load("enemies/grunt.png"),
                 ..default()
