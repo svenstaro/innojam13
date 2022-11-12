@@ -54,7 +54,7 @@ fn spawn_new_wave_on_event(
         let offset = Vec3::new(rand_f32(-50.0, 50.0), rand_f32(-50.0, 50.0), 0.0);
         let pos = base_pos + offset;
 
-        spawn_enemy_at(&mut commands, &asset_server, pos);
+        spawn_enemy_at(&mut commands, &asset_server, pos, 50.0);
     }
 }
 
@@ -69,11 +69,11 @@ fn fountain_spawns_things(
     // }
 }
 
-fn spawn_enemy_at(commands: &mut Commands, asset_server: &Res<AssetServer>, pos: Vec3) {
+fn spawn_enemy_at(commands: &mut Commands, asset_server: &Res<AssetServer>, pos: Vec3, size: f32) {
     commands
         .spawn()
         .insert(RigidBody::Dynamic)
-        .insert(Collider::ball(50.0))
+        .insert(Collider::ball(0.5))
         // .insert(CollisionGroups::new(0b0001.into(), 0b0001.into()))
         // .insert(SolverGroups::new(0b0001.into(), 0b0010.into()))
         .insert(Damping {
@@ -89,7 +89,8 @@ fn spawn_enemy_at(commands: &mut Commands, asset_server: &Res<AssetServer>, pos:
         .insert(PathfindingAgent::new(10.0))
         .insert_bundle(SpriteBundle {
             texture: asset_server.load("enemies/grunt.png"),
-            transform: Transform::from_scale(Vec3::new(0.5, 0.5, 1.0)).with_translation(pos),
+            sprite: Sprite { custom_size: Some(Vec2::splat(1.0)), ..default()},
+            transform: Transform::from_scale(Vec3::new(size, size, 1.0)).with_translation(pos),
             ..default()
         });
 }
