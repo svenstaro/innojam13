@@ -54,7 +54,7 @@ fn spawn_new_wave_on_event(
         let offset = Vec3::new(rand_f32(-50.0, 50.0), rand_f32(-50.0, 50.0), 0.0);
         let pos = base_pos + offset;
 
-        spawn_enemy_at(&mut commands, &asset_server, pos, 50.0);
+        spawn_enemy_at(&mut commands, &asset_server, pos, 120.0);
     }
 }
 
@@ -89,7 +89,10 @@ fn spawn_enemy_at(commands: &mut Commands, asset_server: &Res<AssetServer>, pos:
         .insert(PathfindingAgent::new(10.0))
         .insert_bundle(SpriteBundle {
             texture: asset_server.load("enemies/grunt.png"),
-            sprite: Sprite { custom_size: Some(Vec2::splat(1.0)), ..default()},
+            sprite: Sprite {
+                custom_size: Some(Vec2::splat(1.0)),
+                ..default()
+            },
             transform: Transform::from_scale(Vec3::new(size, size, 1.0)).with_translation(pos),
             ..default()
         });
