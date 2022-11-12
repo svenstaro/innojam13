@@ -36,7 +36,6 @@ struct Enemy;
 
 fn spawn_new_wave_on_event(
     spawn_wave_events: EventReader<SpawnWaveEvent>,
-    windows: Res<Windows>,
     mut commands: Commands,
     asset_server: Res<AssetServer>,
 ) {
@@ -48,16 +47,14 @@ fn spawn_new_wave_on_event(
     // This prevents events staying active on the next frame.
     spawn_wave_events.clear();
 
-    let _window = windows.get_primary().unwrap();
-
     let wave_size = 10;
 
     for _ in 0..wave_size {
-        let base_pos = Vec3::new(0.0, 0.0, 0.0);
+        let base_pos = Vec3::new(1000.0, 500.0, 0.0);
         let offset = Vec3::new(rand_f32(-50.0, 50.0), rand_f32(-50.0, 50.0), 0.0);
         let pos = base_pos + offset;
 
-        spawn_enemy_at(&mut commands, &asset_server, pos);
+        spawn_enemy_at(&mut commands, &asset_server, pos, 120.0);
     }
 }
 
@@ -66,17 +63,17 @@ fn fountain_spawns_things(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
 ) {
-    let &fountain_transform = fountain_query.iter_mut().next().clone().unwrap();
-    if rand_f32(0.0, 1.0) > 0.95 {
-        spawn_enemy_at(&mut commands, &asset_server, fountain_transform.translation);
-    }
+    // let &fountain_transform = fountain_query.iter_mut().next().clone().unwrap();
+    // if rand_f32(0.0, 1.0) > 0.95 {
+    //     spawn_enemy_at(&mut commands, &asset_server, fountain_transform.translation);
+    // }
 }
 
-fn spawn_enemy_at(commands: &mut Commands, asset_server: &Res<AssetServer>, pos: Vec3) {
+fn spawn_enemy_at(commands: &mut Commands, asset_server: &Res<AssetServer>, pos: Vec3, size: f32) {
     commands
         .spawn()
         .insert(RigidBody::Dynamic)
-        .insert(Collider::ball(50.0))
+        .insert(Collider::ball(0.5))
         // .insert(CollisionGroups::new(0b0001.into(), 0b0001.into()))
         // .insert(SolverGroups::new(0b0001.into(), 0b0010.into()))
         .insert(Damping {
@@ -92,7 +89,11 @@ fn spawn_enemy_at(commands: &mut Commands, asset_server: &Res<AssetServer>, pos:
         .insert(PathfindingAgent::new(10.0))
         .insert_bundle(SpriteBundle {
             texture: asset_server.load("enemies/grunt.png"),
-            transform: Transform::from_scale(Vec3::new(0.5, 0.5, 1.0)).with_translation(pos),
+            sprite: Sprite {
+                custom_size: Some(Vec2::splat(1.0)),
+                ..default()
+            },
+            transform: Transform::from_scale(Vec3::new(size, size, 1.0)).with_translation(pos),
             ..default()
         });
 }
