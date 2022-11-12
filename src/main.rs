@@ -108,6 +108,7 @@ fn spawn_new_wave_on_event(
     spawn_wave_events: EventReader<SpawnWaveEvent>,
     windows: Res<Windows>,
     mut commands: Commands,
+    asset_server: Res<AssetServer>,
 ) {
     // Play a sound once per frame if a collision occurred.
     if spawn_wave_events.is_empty() {
@@ -140,7 +141,11 @@ fn spawn_new_wave_on_event(
             })
             .insert_bundle(TransformBundle::from(transform))
             .insert(Enemy)
-            .insert(EnemyType::Grunt);
+            .insert(EnemyType::Grunt)
+            .insert_bundle(SpriteBundle {
+                texture: asset_server.load("enemies/grunt.png"),
+                ..default()
+            });
     }
 }
 
