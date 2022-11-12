@@ -5,9 +5,8 @@ use level::{Fountain, LevelPlugin};
 use pathfinding::{PathfindingAgent, PathfindingPlugin};
 use rand::Rng;
 
-mod pathfinding;
 mod level;
-
+mod pathfinding;
 
 #[derive(Debug, Default)]
 struct SpawnWaveEvent;
@@ -66,8 +65,6 @@ fn setup_graphics(mut commands: Commands) {
         })
         .insert(MainCamera);
 }
-
-
 
 fn get_world_cursor_pos(
     windows: Res<Windows>,
@@ -175,8 +172,6 @@ fn spawn_new_wave_on_event(
             .spawn()
             .insert(RigidBody::Dynamic)
             .insert(Collider::ball(50.0))
-            // .insert(CollisionGroups::new(0b0001.into(), 0b0001.into())
-            // .insert(SolverGroups::new(0b0001.into(), 0b0010.into());
             .insert(Damping {
                 linear_damping: 0.90,
                 angular_damping: 0.5,
@@ -209,8 +204,6 @@ fn fountain_spawns_things(
             .spawn()
             .insert(RigidBody::Dynamic)
             .insert(Collider::ball(50.0))
-            // .insert(CollisionGroups::new(0b0001.into(), 0b0001.into())
-            // .insert(SolverGroups::new(0b0001.into(), 0b0010.into());
             .insert(Damping {
                 linear_damping: 0.90,
                 angular_damping: 0.5,
