@@ -5,7 +5,7 @@ pub struct EnemyPlugin;
 
 use rand::Rng;
 
-use crate::{pathfinding::PathfindingAgent, level::Fountain};
+use crate::{level::Fountain, pathfinding::PathfindingAgent};
 
 #[derive(Debug, Default)]
 pub struct SpawnWaveEvent;
@@ -16,10 +16,9 @@ fn rand_f32(l: f32, u: f32) -> f32 {
 
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
-        app
-        .add_system(spawn_new_wave_on_event)
-        // Enemy processes.
-        .add_system(fountain_spawns_things);
+        app.add_system(spawn_new_wave_on_event)
+            // Enemy processes.
+            .add_system(fountain_spawns_things);
     }
 }
 
@@ -27,9 +26,9 @@ impl Plugin for EnemyPlugin {
 enum EnemyType {
     #[default]
     Grunt,
-    Swimmer,
-    Digger,
-    Tank,
+    // Swimmer,
+    // Digger,
+    // Tank,
 }
 
 #[derive(Component, Debug, Default)]

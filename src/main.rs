@@ -1,17 +1,22 @@
-use bevy::{math::vec2, prelude::*, render::camera::RenderTarget, sprite::MaterialMesh2dBundle};
+use bevy::{prelude::*, render::camera::RenderTarget, sprite::MaterialMesh2dBundle};
 
-use bevy_easings::EasingsPlugin;
 use bevy_rapier2d::prelude::*;
-use enemy::{SpawnWaveEvent, EnemyPlugin};
-use level::{Fountain, LevelPlugin};
-use pathfinding::{PathfindingAgent, PathfindingPlugin};
+use enemy::{EnemyPlugin, SpawnWaveEvent};
+use level::LevelPlugin;
+use pathfinding::PathfindingPlugin;
 
+mod enemy;
+mod main_menu;
+use main_menu::MainMenuPlugin;
 
 mod level;
 mod pathfinding;
-mod enemy;
 
-
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+enum AppState {
+    MainMenu,
+    InGame,
+}
 
 #[derive(Component)]
 struct MainCamera;
@@ -24,11 +29,10 @@ fn main() {
     App::new()
         .add_event::<SpawnWaveEvent>()
         .add_plugins(DefaultPlugins)
-        .add_plugin(EasingsPlugin)
+        .add_plugin(MainMenuPlugin)
         .add_plugin(PathfindingPlugin)
         .add_plugin(LevelPlugin)
         .add_plugin(EnemyPlugin)
-        .add_system(bevy::window::close_on_esc)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(
             PIXELS_PER_METER,
         ))
@@ -37,8 +41,24 @@ fn main() {
         // Input handler systems.
         .add_system(shoot_water)
         .add_system(debug_keymap)
-        // Event reactions.
+        .add_state(AppState::MainMenu)
+        .add_system(main_menu_controls)
         .run();
+}
+
+fn main_menu_controls(mut keys: ResMut<Input<KeyCode>>, mut app_state: ResMut<State<AppState>>) {
+    if *app_state.current() == AppState::MainMenu {
+        if keys.just_pressed(KeyCode::Return) {
+            app_state.set(AppState::InGame).unwrap();
+            keys.reset(KeyCode::Return);
+        }
+    } else {
+        if keys.just_pressed(KeyCode::Escape) {
+            app_state.set(AppState::MainMenu).unwrap();
+            // still needed?
+            keys.reset(KeyCode::Escape);
+        }
+    }
 }
 
 fn setup_graphics(mut commands: Commands) {
