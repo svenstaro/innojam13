@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use macroquad::prelude::*;
 use macroquad::rand::ChooseRandom;
 
-static WORLD_SIZE: UVec2 = UVec2::new(30, 20);
+static WORLD_SIZE: UVec2 = UVec2::new(50, 30);
 
 #[derive(Debug, Clone)]
 struct Atom {
@@ -48,7 +48,13 @@ fn calculate_new_position(x: u32, y: u32, world_display: &Vec<Cell>) -> usize {
     let new_cell_pos = current_pos + current_cell.water.velocity;
     let new_cell_pos = new_cell_pos.clamp(vec2(0.0, 0.0), WORLD_SIZE.as_vec2() - Vec2::ONE);
     let new_index = get_index(new_cell_pos.x as u32, new_cell_pos.y as u32);
-    new_index
+
+    // Check if target cell is occupied.
+    if world_display[new_index].water.pressure > 0 {
+        get_index(x, y)
+    } else {
+        new_index
+    }
 }
 
 #[macroquad::main("Innojam13")]
@@ -71,7 +77,7 @@ async fn main() {
         if is_mouse_button_down(MouseButton::Left) {
             let world_pos = vec2(mx / zoom_factor, my / zoom_factor);
             let cell = &mut world_display[get_index(world_pos.x as u32, world_pos.y as u32)];
-            cell.water.pressure += 1;
+            cell.water.pressure += 5;
         }
 
         let mut total_pressure = 0;
@@ -82,75 +88,76 @@ async fn main() {
             }
         }
 
-        // Calculate all pressures in the world.
+        // Move from world_display to world_pressure.
         for y in 0..WORLD_SIZE.y as u32 {
             for x in 0..WORLD_SIZE.x as u32 {
-                // Update stuff
-                let new_pos = calculate_new_position(x, y, &world_display);
-
                 let current_cell = &mut world_display[get_index(x, y)];
-                let new_cell = &mut world_pressure[new_pos];
+                let new_cell = &mut world_pressure[get_index(x, y)];
 
-                new_cell.water.pressure += current_cell.water.pressure;
+                new_cell.water.pressure = current_cell.water.pressure;
                 current_cell.water.pressure = 0;
             }
         }
 
-        let mut after_gravity_total_pressure = 0;
-        for y in 0..WORLD_SIZE.y as u32 {
-            for x in 0..WORLD_SIZE.x as u32 {
-                let current_cell = &world_pressure[get_index(x, y)];
-                after_gravity_total_pressure += current_cell.water.pressure;
-            }
-        }
-
-        let mut world_display_pressure = 0;
-        for y in 0..WORLD_SIZE.y as u32 {
-            for x in 0..WORLD_SIZE.x as u32 {
-                let current_cell = &world_display[get_index(x, y)];
-                world_display_pressure += current_cell.water.pressure;
-            }
-        }
-        assert_eq!(total_pressure, after_gravity_total_pressure, "fucky gravy");
-        assert_eq!(world_display_pressure, 0);
+        // let mut after_gravity_total_pressure = 0;
+        // for y in 0..WORLD_SIZE.y as u32 {
+        //     for x in 0..WORLD_SIZE.x as u32 {
+        //         let current_cell = &world_pressure[get_index(x, y)];
+        //         after_gravity_total_pressure += current_cell.water.pressure;
+        //     }
+        // }
+        //
+        // let mut world_display_pressure = 0;
+        // for y in 0..WORLD_SIZE.y as u32 {
+        //     for x in 0..WORLD_SIZE.x as u32 {
+        //         let current_cell = &world_display[get_index(x, y)];
+        //         world_display_pressure += current_cell.water.pressure;
+        //     }
+        // }
+        // assert_eq!(total_pressure, after_gravity_total_pressure, "fucky gravy");
+        // assert_eq!(world_display_pressure, 0);
 
         // Resolve pressure.
         for y in 0..WORLD_SIZE.y as u32 {
             for x in 0..WORLD_SIZE.x as u32 {
-                let current_cell = &mut world_pressure[get_index(x, y)];
+                let mut current_cell = world_pressure[get_index(x, y)].clone();
 
                 if current_cell.water.pressure == 0 {
                     continue;
                 }
 
+                let gravity = ivec2(0, 1);
+
                 let mut directions = vec![ivec2(0, -1), ivec2(-1, 0), ivec2(1, 0), ivec2(0, 1)];
                 directions.shuffle();
                 for direction in directions {
+                    // world_pressure[get_index(x, y)]
+                    // TODO Calculate proper pressure differences
                     // Check if we have enough pressure to give.
-                    if current_cell.water.pressure > 1 {
-                        let pos = ivec2(x as i32, y as i32) + direction;
-                        let pos = pos
-                            .clamp(ivec2(0, 0), WORLD_SIZE.as_ivec2() - IVec2::ONE)
-                            .as_uvec2();
-                        world_display[get_index(pos.x, pos.y)].water.pressure += 1;
-                        current_cell.water.pressure -= 1;
-                    } else {
-                        break;
-                    }
+                    // if current_cell.water.pressure > 0 {
+                    //     let pos = ivec2(x as i32, y as i32) + direction + gravity;
+                    //     let pos = pos
+                    //         .clamp(ivec2(0, 0), WORLD_SIZE.as_ivec2() - IVec2::ONE)
+                    //         .as_uvec2();
+                    //     world_display[get_index(pos.x, pos.y)].water.pressure += 1;
+                    //     current_cell.water.pressure -= 1;
+                    // } else {
+                    //     break;
+                    // }
                 }
                 world_display[get_index(x, y)].water.pressure += current_cell.water.pressure;
                 current_cell.water.pressure = 0;
             }
         }
 
-        let mut after_resolve_total_pressure = 0;
-        for y in 0..WORLD_SIZE.y as u32 {
-            for x in 0..WORLD_SIZE.x as u32 {
-                let current_cell = &world_display[get_index(x, y)];
-                after_resolve_total_pressure += current_cell.water.pressure;
-            }
-        }
-        assert_eq!(total_pressure, after_resolve_total_pressure, "fucky wucky");
+        // let mut after_resolve_total_pressure = 0;
+        // for y in 0..WORLD_SIZE.y as u32 {
+        //     for x in 0..WORLD_SIZE.x as u32 {
+        //         let current_cell = &world_display[get_index(x, y)];
+        //         after_resolve_total_pressure += current_cell.water.pressure;
+        //     }
+        // }
+        // assert_eq!(total_pressure, after_resolve_total_pressure, "fucky wucky");
 
         for i in 0..world_pressure.len() {
             // TODO Display depending on prevalent atom pressure.
