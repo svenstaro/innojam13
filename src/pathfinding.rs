@@ -57,7 +57,7 @@ fn init_nav_mesh_debug(
         commands.spawn_bundle(ColorMesh2dBundle {
             mesh: meshes.add(shape::Circle::new(5.0).into()).into(),
             material: materials.add(ColorMaterial::from(Color::PURPLE)),
-            transform: Transform::from_translation(Vec3::new(node.x, node.y, 0.0)),
+            transform: Transform::from_translation(Vec3::new(node.x, node.y, 1.9)),
             ..default()
         });
     }
@@ -99,7 +99,18 @@ fn get_force_from_navmesh(
 impl Plugin for PathfindingPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(Navmesh::generate(
-            vec![Vec2::new(-130.0, -170.0), Vec2::new(130.0, -170.0)],
+            vec![
+                Vec2::new(100.0, 120.0), 
+                Vec2::new(1160.0, 120.0),
+                Vec2::new(1160.0, 460.0),
+                Vec2::new(640.0, 800.0),
+                Vec2::new(100.0, 800.0),
+                Vec2::new(100.0, 1150.0),
+                Vec2::new(330.0, 1400.0),
+                Vec2::new(1110.0, 1400.0),
+                Vec2::new(1110.0, 1800.0),
+                Vec2::new(1500.0, 1800.0),
+            ],
             0.1,
         ));
         app.add_startup_system(init_nav_mesh_debug);
