@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 bevy = "0.8"
 bevy_rapier2d = { version = "0.18", features = [ "simd-stable", "debug-render", "parallel" ] }
+rand = "0.8.5"
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]
