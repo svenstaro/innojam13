@@ -79,3 +79,25 @@ fn setup_map(mut commands: Commands, windows: Res<Windows>) {
 
     //
 }
+
+#[warn(dead_code)]
+fn spawn_fountain(mut commands: Commands) {
+    let fountain = Collider::cuboid(50.0, 50.0);
+    let fountain_offset = Transform::from_xyz(100.0, 100.0, 0.0);
+    commands
+        .spawn()
+        .insert(Fountain)
+        .insert(fountain)
+        .insert(CollisionGroups::new(Group::GROUP_31, Group::NONE))
+        .insert_bundle(TransformBundle::from(fountain_offset));
+
+    let base = Collider::cuboid(50.0, 50.0);
+
+    let base_offset = Transform::from_xyz(1500.0, 500.0, 0.0);
+    commands
+        .spawn()
+        .insert(Base)
+        .insert(base)
+        .insert(CollisionGroups::new(Group::GROUP_31, Group::GROUP_1))
+        .insert_bundle(TransformBundle::from(base_offset));
+}

@@ -27,6 +27,7 @@ fn shoot_water(
                 .spawn()
                 .insert(RigidBody::Dynamic)
                 .insert(Collider::ball(0.5))
+                .insert(CollisionGroups::new(Group::GROUP_2, Group::GROUP_1 | Group::GROUP_2))
                 .insert(Restitution::coefficient(0.1))
                 .insert(ExternalImpulse {
                     impulse: Vec2::new(5.0, -5.0),
