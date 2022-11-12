@@ -35,7 +35,6 @@ impl Navmesh {
 
             for step_nr in 0..steps {
                 let t = step_nr as f32 / steps as f32;
-                dbg!(t);
                 let new_node = last_node.lerp(next_node, t);
                 nodes.push(new_node);
             }

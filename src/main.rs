@@ -2,27 +2,16 @@ use bevy::{math::vec2, prelude::*, render::camera::RenderTarget, sprite::Materia
 
 use bevy_easings::EasingsPlugin;
 use bevy_rapier2d::prelude::*;
+use enemy::{SpawnWaveEvent, EnemyPlugin};
 use level::{Fountain, LevelPlugin};
 use pathfinding::{PathfindingAgent, PathfindingPlugin};
-use rand::Rng;
+
 
 mod level;
 mod pathfinding;
+mod enemy;
 
-#[derive(Debug, Default)]
-struct SpawnWaveEvent;
 
-#[derive(Component, Debug, Default)]
-enum EnemyType {
-    #[default]
-    Grunt,
-    // Swimmer,
-    // Digger,
-    // Tank,
-}
-
-#[derive(Component, Debug, Default)]
-struct Enemy;
 
 #[derive(Component)]
 struct MainCamera;
@@ -36,6 +25,7 @@ fn main() {
         .add_plugin(EasingsPlugin)
         .add_plugin(PathfindingPlugin)
         .add_plugin(LevelPlugin)
+        .add_plugin(EnemyPlugin)
         .add_system(bevy::window::close_on_esc)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(
             PIXELS_PER_METER,
@@ -46,9 +36,6 @@ fn main() {
         .add_system(shoot_water)
         .add_system(debug_keymap)
         // Event reactions.
-        .add_system(spawn_new_wave_on_event)
-        // Enemy processes.
-        .add_system(fountain_spawns_things)
         .run();
 }
 
@@ -140,82 +127,5 @@ fn debug_keymap(keys: Res<Input<KeyCode>>, mut spawn_wave_events: EventWriter<Sp
     // Spawn next wave.
     if keys.pressed(KeyCode::N) {
         spawn_wave_events.send_default();
-    }
-}
-
-fn rand_f32(l: f32, u: f32) -> f32 {
-    rand::thread_rng().gen_range(l..u)
-}
-
-fn spawn_enemy_at(commands: &mut Commands, asset_server: &Res<AssetServer>, pos: Vec3) {
-    commands
-        .spawn()
-        .insert(RigidBody::Dynamic)
-        .insert(Collider::ball(50.0))
-        // .insert(CollisionGroups::new(0b0001.into(), 0b0001.into()))
-        // .insert(SolverGroups::new(0b0001.into(), 0b0010.into()))
-        .insert(Damping {
-            linear_damping: 0.90,
-            angular_damping: 0.5,
-        })
-        .insert(ExternalForce {
-            force: Vec2::new(0.0, 0.0),
-            torque: 0.0,
-        })
-        .insert(PathfindingAgent::new(10.0))
-        .insert(Enemy)
-        .insert(EnemyType::Grunt)
-        .insert(PathfindingAgent::new(10.0))
-        .insert_bundle(SpriteBundle {
-            texture: asset_server.load("enemies/grunt.png"),
-            transform: Transform::from_scale(Vec3::new(0.5, 0.5, 1.0)).with_translation(pos),
-            ..default()
-        });
-}
-
-fn spawn_new_wave_on_event(
-    spawn_wave_events: EventReader<SpawnWaveEvent>,
-    windows: Res<Windows>,
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut fountain_query: Query<&Transform, With<Fountain>>,
-) {
-    // Play a sound once per frame if a collision occurred.
-    if spawn_wave_events.is_empty() {
-        return;
-    }
-
-    // This prevents events staying active on the next frame.
-    spawn_wave_events.clear();
-
-    let _window = windows.get_primary().unwrap();
-
-    let wave_size = 10;
-
-    let fountain_pos = fountain_query
-        .iter_mut()
-        .next()
-        .clone()
-        .unwrap()
-        .translation;
-    for _ in 0..wave_size {
-        let offset = Vec3::new(rand_f32(-50.0, 50.0), rand_f32(-50.0, 50.0), 0.0);
-        spawn_enemy_at(&mut commands, &asset_server, fountain_pos + offset);
-    }
-}
-
-fn fountain_spawns_things(
-    mut fountain_query: Query<&Transform, With<Fountain>>,
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-) {
-    let fountain_pos = fountain_query
-        .iter_mut()
-        .next()
-        .clone()
-        .unwrap()
-        .translation;
-    if rand_f32(0.0, 1.0) > 0.95 {
-        spawn_enemy_at(&mut commands, &asset_server, fountain_pos);
     }
 }
