@@ -54,33 +54,11 @@ fn spawn_new_wave_on_event(
     let wave_size = 10;
 
     for _ in 0..wave_size {
-        let base_transform = Transform::from_xyz(0.0, 0.0, 0.0);
+        let base_pos = Vec3::new(0.0, 0.0, 0.0);
         let offset = Vec3::new(rand_f32(-50.0, 50.0), rand_f32(-50.0, 50.0), 0.0);
-        let transform = base_transform.with_translation(base_transform.translation + offset);
+        let pos = base_pos + offset;
 
-        commands
-            .spawn()
-            .insert(RigidBody::Dynamic)
-            .insert(Collider::ball(50.0))
-            // .insert(CollisionGroups::new(0b0001.into(), 0b0001.into())
-            // .insert(SolverGroups::new(0b0001.into(), 0b0010.into());
-            .insert(Damping {
-                linear_damping: 0.90,
-                angular_damping: 0.5,
-            })
-            .insert(ExternalForce {
-                force: Vec2::new(0.0, 0.0),
-                torque: 0.0,
-            })
-            .insert_bundle(TransformBundle::from(transform))
-            .insert(Enemy)
-            .insert(EnemyType::Grunt)
-            .insert(PathfindingAgent::new(10.0))
-            .insert_bundle(SpriteBundle {
-                texture: asset_server.load("enemies/grunt.png"),
-                transform: Transform::from_scale(Vec3::new(0.5, 0.5, 1.0)),
-                ..default()
-            });
+        spawn_enemy_at(&mut commands, &asset_server, pos);
     }
 }
 
@@ -91,29 +69,7 @@ fn fountain_spawns_things(
 ) {
     let &fountain_transform = fountain_query.iter_mut().next().clone().unwrap();
     if rand_f32(0.0, 1.0) > 0.95 {
-        commands
-            .spawn()
-            .insert(RigidBody::Dynamic)
-            .insert(Collider::ball(50.0))
-            // .insert(CollisionGroups::new(0b0001.into(), 0b0001.into())
-            // .insert(SolverGroups::new(0b0001.into(), 0b0010.into());
-            .insert(Damping {
-                linear_damping: 0.90,
-                angular_damping: 0.5,
-            })
-            .insert(ExternalForce {
-                force: Vec2::new(0.0, 0.0),
-                torque: 0.0,
-            })
-            .insert_bundle(TransformBundle::from(fountain_transform))
-            .insert(Enemy)
-            .insert(EnemyType::Grunt)
-            .insert(PathfindingAgent::new(10.0))
-            .insert_bundle(SpriteBundle {
-                texture: asset_server.load("enemies/grunt.png"),
-                transform: Transform::from_scale(Vec3::new(0.5, 0.5, 1.0)),
-                ..default()
-            });
+        spawn_enemy_at(&mut commands, &asset_server, fountain_transform.translation);
     }
 }
 
@@ -132,7 +88,6 @@ fn spawn_enemy_at(commands: &mut Commands, asset_server: &Res<AssetServer>, pos:
             force: Vec2::new(0.0, 0.0),
             torque: 0.0,
         })
-        .insert(PathfindingAgent::new(10.0))
         .insert(Enemy)
         .insert(EnemyType::Grunt)
         .insert(PathfindingAgent::new(10.0))
