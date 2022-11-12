@@ -45,14 +45,17 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         color: Color::WHITE,
     };
 
-    commands.spawn_bundle(Text2dBundle {
-        text: Text::from_section("Attack phase", text_style).with_alignment(TextAlignment::CENTER),
-        transform: Transform {
-            translation: vec3(WORLD_SIZE.0 / 2.0, WORLD_SIZE.1 - 400.0, 0.0),
+    commands
+        .spawn_bundle(Text2dBundle {
+            text: Text::from_section("Attack phase", text_style)
+                .with_alignment(TextAlignment::CENTER),
+            transform: Transform {
+                translation: vec3(WORLD_SIZE.0 / 2.0, WORLD_SIZE.1 - 400.0, 0.0),
+                ..default()
+            },
             ..default()
-        },
-        ..default()
-    });
+        })
+        .insert(AttackStateText);
 
     let text_style = TextStyle {
         font,
