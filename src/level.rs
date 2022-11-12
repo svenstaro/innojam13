@@ -21,16 +21,12 @@ fn setup_map(mut commands: Commands, windows: Res<Windows>) {
     let window_width = window.width() as f32;
     let window_height = window.height() as f32;
 
-    let floor = Collider::cuboid(window_width / 2.0 - 10.0, 50.0);
-
     // Create the ground.
     commands
         .spawn()
-        .insert(floor)
+        .insert(Collider::cuboid(500.0, 100.0))
         .insert_bundle(TransformBundle::from(Transform::from_xyz(
-            0.0,
-            -window_height / 2.0 + 50.0 + 10.0,
-            0.0,
+            1500.0, 200.0, 0.0,
         )));
 
     let fountain = Collider::cuboid(50.0, 50.0);

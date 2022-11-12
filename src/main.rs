@@ -1,17 +1,19 @@
-use bevy::{math::vec2, prelude::*, render::camera::RenderTarget, sprite::MaterialMesh2dBundle};
+use bevy::{
+    math::{vec2, vec3},
+    prelude::*,
+    render::camera::RenderTarget,
+    sprite::MaterialMesh2dBundle,
+};
 
 use bevy_easings::EasingsPlugin;
 use bevy_rapier2d::prelude::*;
-use enemy::{SpawnWaveEvent, EnemyPlugin};
+use enemy::{EnemyPlugin, SpawnWaveEvent};
 use level::{Fountain, LevelPlugin};
 use pathfinding::{PathfindingAgent, PathfindingPlugin};
 
-
+mod enemy;
 mod level;
 mod pathfinding;
-mod enemy;
-
-
 
 #[derive(Component)]
 struct MainCamera;
@@ -45,6 +47,11 @@ fn setup_graphics(mut commands: Commands) {
     // Add a camera so we can see the debug-render.
     commands
         .spawn_bundle(Camera2dBundle {
+            transform: Transform::from_translation(vec3(
+                WORLD_SIZE.0 / 2.0,
+                WORLD_SIZE.1 / 2.0,
+                0.0,
+            )),
             projection: OrthographicProjection {
                 scaling_mode: bevy::render::camera::ScalingMode::Auto {
                     min_width: WORLD_SIZE.0,
