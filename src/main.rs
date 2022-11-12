@@ -53,11 +53,14 @@ fn main() {
 
 fn setup_graphics(mut commands: Commands) {
     // Add a camera so we can see the debug-render.
-    commands.spawn_bundle(Camera2dBundle {
-        projection: OrthographicProjection {
-            scaling_mode: bevy::render::camera::ScalingMode::Auto {
-                min_width: 10000.0,
-                min_height: 6000.0,
+    commands
+        .spawn_bundle(Camera2dBundle {
+            projection: OrthographicProjection {
+                scaling_mode: bevy::render::camera::ScalingMode::Auto {
+                    min_width: 3400.0,
+                    min_height: 2000.0,
+                },
+                ..default()
             },
             ..default()
         },
