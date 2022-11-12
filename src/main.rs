@@ -1,8 +1,12 @@
-use bevy::prelude::*;
+use bevy::{input::keyboard::KeyboardInput, prelude::*};
 use bevy_rapier2d::prelude::*;
+
+#[derive(Debug, Default)]
+struct SpawnWaveEvent;
 
 fn main() {
     App::new()
+        .add_event::<SpawnWaveEvent>()
         .add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
         .add_plugin(RapierDebugRenderPlugin::default())
@@ -10,6 +14,8 @@ fn main() {
         .add_startup_system(setup_physics)
         .add_system(print_ball_altitude)
         .add_system(shoot_water)
+        .add_system(spawn_new_wave_on_event)
+        .add_system(debug_keymap)
         .run();
 }
 
@@ -71,4 +77,39 @@ fn shoot_water(buttons: Res<Input<MouseButton>>, windows: Res<Windows>, mut comm
             // cursor is not inside the window
         }
     }
+}
+
+fn debug_keymap(keys: Res<Input<KeyCode>>, mut spawn_wave_events: EventWriter<SpawnWaveEvent>) {
+    // Spawn next wave.
+    if keys.pressed(KeyCode::N) {
+        spawn_wave_events.send_default();
+    }
+}
+
+fn spawn_new_wave_on_event(
+    spawn_wave_events: EventReader<SpawnWaveEvent>,
+    windows: Res<Windows>,
+    mut commands: Commands,
+) {
+    // Play a sound once per frame if a collision occurred.
+    if spawn_wave_events.is_empty() {
+        return;
+    }
+
+    // This prevents events staying active on the next frame.
+    spawn_wave_events.clear();
+
+    let window = windows.get_primary().unwrap();
+    commands
+        .spawn()
+        .insert(RigidBody::Dynamic)
+        .insert(Collider::ball(20.0))
+        .insert(Damping {
+            linear_damping: 0.5,
+            angular_damping: 0.8,
+        })
+        .insert_bundle(TransformBundle::from(Transform::from_xyz(
+            0.0, // window.width() / 2.0,
+            0.0, 0.0,
+        )));
 }
