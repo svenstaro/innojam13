@@ -1,7 +1,7 @@
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use bevy_rapier2d::prelude::*;
 
-use crate::{input::get_world_cursor_pos, MainCamera};
+use crate::{input::get_world_cursor_pos, MainCamera, game_state::AppState};
 
 #[derive(Debug, Default)]
 pub struct SpawnCannonGadgetEvent;
@@ -39,10 +39,11 @@ fn handle_spawn_cannons(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut spawn_wave_events: EventReader<SpawnCannonGadgetEvent>,
+    app_state: Res<State<AppState>>,
     windows: Res<Windows>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
 ) {
-    if spawn_wave_events.is_empty() {
+    if spawn_wave_events.is_empty() || *app_state.current() != AppState::Build {
         return;
     }
     spawn_wave_events.clear();
