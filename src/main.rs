@@ -2,6 +2,12 @@ use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use bevy_rapier2d::prelude::*;
 use rand::Rng;
 
+#[derive(Debug, Default, Component)]
+struct Fountain;
+
+#[derive(Debug, Default, Component)]
+struct Base;
+
 #[derive(Debug, Default)]
 struct SpawnWaveEvent;
 
@@ -17,19 +23,28 @@ enum EnemyType {
 #[derive(Component, Debug, Default)]
 struct Enemy;
 
+const PIXELS_PER_METER: f32 = 100.0;
+
 fn main() {
     App::new()
         .add_event::<SpawnWaveEvent>()
         .add_plugins(DefaultPlugins)
-        .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
+        .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(
+            PIXELS_PER_METER,
+        ))
         .add_plugin(RapierDebugRenderPlugin::default())
         .add_startup_system(setup_graphics)
-        .add_startup_system(setup_physics)
+        .add_startup_system(setup_map)
+        // Rendering?
         .add_system(print_ball_altitude)
+        // Input handler systems.
         .add_system(shoot_water)
-        .add_system(spawn_new_wave_on_event)
-        .add_system(enemy_pathfinding)
         .add_system(debug_keymap)
+        // Event reactions.
+        .add_system(spawn_new_wave_on_event)
+        // Enemy processes.
+        .add_system(fountain_spawns_things)
+        .add_system(enemy_pathfinding)
         .run();
 }
 
@@ -38,28 +53,64 @@ fn setup_graphics(mut commands: Commands) {
     commands.spawn_bundle(Camera2dBundle::default());
 }
 
-fn setup_physics(mut commands: Commands) {
-    /* Create the ground. */
-    commands
-        .spawn()
-        .insert(Collider::cuboid(500.0, 50.0))
-        .insert_bundle(TransformBundle::from(Transform::from_xyz(0.0, -100.0, 0.0)));
-    commands
-        .spawn()
-        .insert(Collider::cuboid(20.0, 100.0))
-        .insert_bundle(TransformBundle::from(Transform::from_xyz(100.0, 0.0, 0.0)));
-    commands
-        .spawn()
-        .insert(Collider::cuboid(20.0, 100.0))
-        .insert_bundle(TransformBundle::from(Transform::from_xyz(300.0, 0.0, 0.0)));
+fn setup_map(mut commands: Commands, windows: Res<Windows>) {
+    let window = windows.get_primary().unwrap();
 
-    /* Create the bouncing ball. */
+    let window_width = window.width() as f32;
+    let window_height = window.height() as f32;
+
+    let floor = Collider::cuboid(window_width / 2.0 - 10.0, 50.0);
+
+    // Create the ground.
     commands
         .spawn()
-        .insert(RigidBody::Dynamic)
-        .insert(Collider::ball(50.0))
-        .insert(Restitution::coefficient(0.7))
-        .insert_bundle(TransformBundle::from(Transform::from_xyz(0.0, 400.0, 0.0)));
+        .insert(floor)
+        .insert_bundle(TransformBundle::from(Transform::from_xyz(
+            0.0,
+            -window_height / 2.0 + 50.0 + 10.0,
+            0.0,
+        )));
+
+    let fountain = Collider::cuboid(50.0, 50.0);
+    let fountain_offset = Transform::from_xyz(
+        window_width / 2.0 - 50.0 - 10.0,
+        -window_height / 2.0 + 100.0 + 50.0 + 10.0,
+        0.0,
+    );
+    commands
+        .spawn()
+        .insert(Fountain)
+        .insert(fountain)
+        .insert_bundle(TransformBundle::from(fountain_offset));
+
+    let base = Collider::cuboid(50.0, 50.0);
+    let base_offset = Transform::from_xyz(
+        -(window_width / 2.0 - 50.0 - 10.0),
+        -window_height / 2.0 + 100.0 + 50.0 + 10.0,
+        0.0,
+    );
+    commands
+        .spawn()
+        .insert(Base)
+        .insert(base)
+        .insert_bundle(TransformBundle::from(base_offset));
+
+    // commands
+    //     .spawn()
+    //     .insert(Collider::cuboid(20.0, 100.0))
+    //     .insert_bundle(TransformBundle::from(Transform::from_xyz(100.0, 0.0, 0.0)));
+    // commands
+    //     .spawn()
+    //     .insert(Collider::cuboid(20.0, 100.0))
+    //     .insert_bundle(TransformBundle::from(Transform::from_xyz(300.0, 0.0, 0.0)));
+    //
+    // /* Create the bouncing ball. */
+    // commands
+    //     .spawn()
+    //     .insert(RigidBody::Dynamic)
+    //     .insert(Collider::ball(50.0))
+    //     .insert(Restitution::coefficient(0.7))
+    //     .insert_bundle(TransformBundle::from(Transform::from_xyz(0.0, 400.0, 0.0)));
 }
 
 fn print_ball_altitude(_positions: Query<&Transform, With<RigidBody>>) {
@@ -147,6 +198,8 @@ fn spawn_new_wave_on_event(
             .spawn()
             .insert(RigidBody::Dynamic)
             .insert(Collider::ball(10.0))
+            // .insert(CollisionGroups::new(0b0001.into(), 0b0001.into())
+            // .insert(SolverGroups::new(0b0001.into(), 0b0010.into());
             .insert(Damping {
                 linear_damping: 0.90,
                 angular_damping: 0.5,
@@ -174,6 +227,39 @@ fn enemy_pathfinding(
         let direction = target - transform.translation.truncate();
 
         // TODO switch by enemy type
-        ext_force.force = direction.normalize() * 10.0;
+        ext_force.force = direction.normalize() * 5.0;
+    }
+}
+
+fn fountain_spawns_things(
+    mut fountain_query: Query<(&Transform), With<Fountain>>,
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+) {
+    let &fountain_transform = fountain_query.iter_mut().next().clone().unwrap();
+    println!("{:?}", fountain_transform);
+
+    if rand_f32(0.0, 1.0) > 0.95 {
+        commands
+            .spawn()
+            .insert(RigidBody::Dynamic)
+            .insert(Collider::ball(10.0))
+            // .insert(CollisionGroups::new(0b0001.into(), 0b0001.into())
+            // .insert(SolverGroups::new(0b0001.into(), 0b0010.into());
+            .insert(Damping {
+                linear_damping: 0.90,
+                angular_damping: 0.5,
+            })
+            .insert(ExternalForce {
+                force: Vec2::new(0.0, 0.0),
+                torque: 0.0,
+            })
+            .insert_bundle(TransformBundle::from(fountain_transform))
+            .insert(Enemy)
+            .insert(EnemyType::Grunt)
+            .insert_bundle(SpriteBundle {
+                texture: asset_server.load("enemies/grunt.png"),
+                ..default()
+            });
     }
 }
