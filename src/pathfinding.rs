@@ -88,7 +88,7 @@ fn get_force_from_navmesh(
         let dir = current_node - sample_position;
         let dist = current_node.distance(sample_position);
 
-        if dist < 5.0 {
+        if dist < 50.0 {
             agent.current_idx = (agent.current_idx + 1).min(navmesh.nodes.len() - 1);
             continue;
         }
@@ -100,8 +100,8 @@ impl Plugin for PathfindingPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(Navmesh::generate(
             vec![
-                Vec2::new(100.0, 120.0), 
-                Vec2::new(1160.0, 120.0),
+                Vec2::new(180.0, 135.0), 
+                Vec2::new(1160.0, 135.0),
                 Vec2::new(1160.0, 460.0),
                 Vec2::new(640.0, 800.0),
                 Vec2::new(100.0, 800.0),

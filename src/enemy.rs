@@ -8,7 +8,7 @@ pub struct EnemyPlugin;
 
 use rand::Rng;
 
-use crate::{level::Fountain, pathfinding::PathfindingAgent};
+use crate::{level::Fountain, pathfinding::PathfindingAgent, input::get_world_cursor_pos, MainCamera};
 
 #[derive(Debug, Default)]
 pub struct SpawnWaveEvent;
@@ -45,8 +45,11 @@ fn spawn_new_wave_on_event(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut fountain_query: Query<&Transform, With<Fountain>>,
+    windows: Res<Windows>,
+    camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
 ) {
-    // Play a sound once per frame if a collision occurred.
+    if let Some(mouse_pos) =  get_world_cursor_pos(windows, camera_q) {
+        // Play a sound once per frame if a collision occurred.
     if spawn_wave_events.is_empty() {
         return;
     }
@@ -59,12 +62,14 @@ fn spawn_new_wave_on_event(
         Vec3::new(1000.0, 500.0, 0.0)
     };
 
-    let wave_size = 10;
+    let wave_size = 1;
     for _ in 0..wave_size {
         let offset = Vec3::new(rand_f32(-50.0, 50.0), rand_f32(-50.0, 50.0), 0.0);
         let pos = base_pos + offset;
-        spawn_enemy_at(&mut commands, &asset_server, pos, 120.0);
+        spawn_enemy_at(&mut commands, &asset_server, Vec3::new(mouse_pos.x, mouse_pos.y, 0.0), 120.0);
     }
+    }
+    
 }
 
 fn fountain_spawns_things(
@@ -98,7 +103,7 @@ fn spawn_enemy_at(commands: &mut Commands, asset_server: &Res<AssetServer>, pos:
         })
         .insert(Enemy)
         .insert(EnemyType::Grunt)
-        .insert(PathfindingAgent::new(10.0))
+        .insert(PathfindingAgent::new(200.0))
         .insert_bundle(SpriteBundle {
             sprite: Sprite {
                 custom_size: Some(Vec2::splat(1.0)),
