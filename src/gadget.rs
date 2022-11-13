@@ -1,7 +1,7 @@
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use bevy_rapier2d::prelude::*;
 
-use crate::{input::get_world_cursor_pos, MainCamera, game_state::AppState};
+use crate::{game_state::AppState, input::get_world_cursor_pos, MainCamera};
 
 #[derive(Debug, Default)]
 pub struct SpawnCannonGadgetEvent;
@@ -10,7 +10,7 @@ pub struct GadgetPlugin;
 
 #[derive(Component, Default)]
 pub struct Gadget {
-    is_placed: bool,
+    pub is_placed: bool,
 }
 
 #[derive(Component, Default)]
@@ -26,11 +26,11 @@ pub struct CannonGadget {
 
 impl Plugin for GadgetPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<SpawnCannonGadgetEvent>();
-        app.add_system(shoot_water);
-        app.add_system(on_gadget_placment_status_change);
-        app.add_system(handle_spawn_cannons);
-        app.add_system(update_gadget_placement);
+        app.add_event::<SpawnCannonGadgetEvent>()
+            .add_system(shoot_water_system)
+            .add_system(on_gadget_placment_status_change)
+            .add_system(handle_spawn_cannons)
+            .add_system(update_gadget_placement);
     }
 }
 
@@ -74,16 +74,14 @@ fn handle_spawn_cannons(
 
 fn update_gadget_placement(
     mut commands: Commands,
-    mut gadget_query: Query<(&mut Gadget, &mut Transform) >,
+    mut gadget_query: Query<(&mut Gadget, &mut Transform)>,
     windows: Res<Windows>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-    mouse_buttons: Res<Input<MouseButton>>
+    mouse_buttons: Res<Input<MouseButton>>,
 ) {
-   
-
     if let Some(position) = get_world_cursor_pos(windows, camera_q) {
         for (mut gadget, mut gadget_transform) in &mut gadget_query {
-            if mouse_buttons.just_released(MouseButton::Left){
+            if mouse_buttons.just_released(MouseButton::Left) {
                 gadget.is_placed = true;
             }
             if !gadget.is_placed {
@@ -105,7 +103,7 @@ fn on_gadget_placment_status_change(
     }
 }
 
-fn shoot_water(
+fn shoot_water_system(
     buttons: Res<Input<MouseButton>>,
     windows: Res<Windows>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
@@ -115,28 +113,42 @@ fn shoot_water(
 ) {
     if buttons.pressed(MouseButton::Left) {
         if let Some(position) = get_world_cursor_pos(windows, camera_q) {
-            commands
-                .spawn()
-                .insert(RigidBody::Dynamic)
-                .insert(Collider::ball(0.5))
-                .insert(CollisionGroups::new(
-                    Group::GROUP_2,
-                    Group::GROUP_1 | Group::GROUP_2,
-                ))
-                .insert(Restitution::coefficient(0.1))
-                .insert(ExternalImpulse {
-                    impulse: Vec2::new(5.0, -5.0),
-                    torque_impulse: 0.0,
-                })
-                .insert_bundle(MaterialMesh2dBundle {
-                    mesh: meshes.add(Mesh::from(shape::Circle::default())).into(),
-                    transform: Transform::from_xyz(position.x, position.y, 0.96)
-                        .with_scale(Vec3::splat(10.)),
-                    material: materials.add(ColorMaterial::from(Color::BLUE)),
-                    ..default()
-                });
-        } else {
-            // cursor is not inside the window
+            shoot_water(
+                Vec3::new(position.x, position.y, 0.0),
+                Vec3::new(position.x, position.y, 0.0) + Vec3::NEG_ONE,
+                &mut meshes,
+                &mut materials,
+                &mut commands,
+            );
         }
     }
+}
+
+pub fn shoot_water(
+    shoot_pos: Vec3,
+    target_pos: Vec3,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<ColorMaterial>>,
+    commands: &mut Commands,
+) {
+    commands
+        .spawn()
+        .insert(RigidBody::Dynamic)
+        .insert(Collider::ball(0.5))
+        .insert(CollisionGroups::new(
+            Group::GROUP_2,
+            Group::GROUP_1 | Group::GROUP_2,
+        ))
+        .insert(Restitution::coefficient(0.1))
+        .insert(ExternalImpulse {
+            impulse: (target_pos - shoot_pos).truncate().normalize() * 10.0,
+            torque_impulse: 0.0,
+        })
+        .insert_bundle(MaterialMesh2dBundle {
+            mesh: meshes.add(Mesh::from(shape::Circle::default())).into(),
+            transform: Transform::from_xyz(shoot_pos.x, shoot_pos.y, 0.96)
+                .with_scale(Vec3::splat(10.)),
+            material: materials.add(ColorMaterial::from(Color::BLUE)),
+            ..default()
+        });
 }
