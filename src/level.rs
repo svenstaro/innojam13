@@ -56,6 +56,22 @@ fn setup_map(
     let window_width = window.width() as f32;
     let window_height = window.height() as f32;
 
+    // background
+    commands
+        .spawn_bundle(MaterialMesh2dBundle {
+            mesh: meshes
+                .add(Mesh::from(shape::Quad::new(Vec2::new(
+                    WORLD_SIZE.0 + 400.0,
+                    WORLD_SIZE.1 + 400.0,
+                    // window_width,
+                    // window_height
+                ))))
+                .into(),
+            material: materials.add(ColorMaterial::from(Color::hex("0C1E21").unwrap())),
+            transform: Transform::from_xyz(WORLD_SIZE.0 / 2.0, WORLD_SIZE.1 / 2.0, 0.0),
+            ..default()
+        });
+
     let fountain_offset = Transform::from_xyz(
         180.0, 
         135.0,
