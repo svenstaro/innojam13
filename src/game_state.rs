@@ -54,7 +54,7 @@ fn audio_system(
     match *app_state.current() {
         AppState::Intro => {
             audio.play_with_settings(
-                asset_server.load("music/menu-start.mp3"),
+                asset_server.load("music/menu-start.ogg"),
                 PlaybackSettings {
                     repeat: false,
                     volume: 0.75,
