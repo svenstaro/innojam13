@@ -130,7 +130,7 @@ fn shoot_water(
                 })
                 .insert_bundle(MaterialMesh2dBundle {
                     mesh: meshes.add(Mesh::from(shape::Circle::default())).into(),
-                    transform: Transform::from_xyz(position.x, position.y, 0.0)
+                    transform: Transform::from_xyz(position.x, position.y, 0.96)
                         .with_scale(Vec3::splat(10.)),
                     material: materials.add(ColorMaterial::from(Color::BLUE)),
                     ..default()
