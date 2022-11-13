@@ -25,9 +25,10 @@ pub struct WaveControler {
 
 impl Plugin for GameStatePlugin {
     fn build(&self, app: &mut App) {
-        app.add_state(AppState::Intro);
-        app.add_system(check_game_over);
-        app.insert_resource(WaveControler{ wave_size: 1 });
+        app.add_state(AppState::Intro)
+        .add_startup_system(audio_system)
+        .add_system(check_game_over)
+        .insert_resource(WaveControler{ wave_size: 1 });
     }
 }
 
@@ -42,5 +43,65 @@ fn check_game_over(mut commands: Commands, base_query: Query<&Transform, With<Ba
         if base_pos.distance(enemy_pos) < KILL_DIST && *app_state.current() != AppState::GameOver{
             app_state.set(AppState::GameOver).unwrap();
         }
+    }
+}
+
+fn audio_system(
+    audio: Res<Audio>,
+    app_state: Res<State<AppState>>,
+    asset_server: Res<AssetServer>,
+) {
+    match *app_state.current() {
+        AppState::Intro => {
+            audio.play_with_settings(
+                asset_server.load("music/menu-start.mp3"),
+                PlaybackSettings {
+                    repeat: false,
+                    volume: 0.75,
+                    speed: 1.0,
+                },
+            );
+
+            audio.play_with_settings(
+                asset_server.load("music/menu-loop.ogg"),
+                PlaybackSettings {
+                    repeat: true,
+                    volume: 0.75,
+                    speed: 1.0,
+                },
+            );
+        }
+
+        AppState::MainMenu => {
+            audio.play_with_settings(
+                asset_server.load("music/menu-loop.ogg"),
+                PlaybackSettings {
+                    repeat: true,
+                    volume: 0.75,
+                    speed: 1.0,
+                },
+            );
+        }
+        // AppState::Build => {
+        //     audio.play_with_settings(
+        //        ...
+        //         PlaybackSettings {
+        //             repeat: true,
+        //             volume: 0.75,
+        //             speed: 1.0,
+        //         },
+        //     );
+        // }
+        // AppState::Attack => {
+        //     audio.play_with_settings(
+        //         ...
+        //         PlaybackSettings {
+        //             repeat: true,
+        //             volume: 0.75,
+        //             speed: 1.0,
+        //         },
+        //     );
+        // }
+        _ => {}
     }
 }

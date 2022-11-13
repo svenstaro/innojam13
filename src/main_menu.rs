@@ -32,8 +32,7 @@ impl Plugin for MainMenuPlugin {
             ) // or spawn main menu directly?
             .add_system_set(SystemSet::on_exit(AppState::Intro).with_system(spawn_main_menu))
             .add_system_set(SystemSet::on_exit(AppState::MainMenu).with_system(despawn_main_menu))
-            .add_system(main_menu_controls)
-            .add_startup_system(audio_system);
+            .add_system(main_menu_controls);
     }
 }
 
@@ -225,65 +224,5 @@ fn main_menu_controls(mut keys: ResMut<Input<KeyCode>>, mut app_state: ResMut<St
             app_state.set(AppState::Intro).unwrap();
             keys.reset(KeyCode::Escape);
         }
-    }
-}
-
-fn audio_system(
-    audio: Res<Audio>,
-    app_state: Res<State<AppState>>,
-    asset_server: Res<AssetServer>,
-) {
-    match *app_state.current() {
-        AppState::Intro => {
-            audio.play_with_settings(
-                asset_server.load("music/menu-start.mp3"),
-                PlaybackSettings {
-                    repeat: false,
-                    volume: 0.75,
-                    speed: 1.0,
-                },
-            );
-
-            audio.play_with_settings(
-                asset_server.load("music/menu-loop.ogg"),
-                PlaybackSettings {
-                    repeat: true,
-                    volume: 0.75,
-                    speed: 1.0,
-                },
-            );
-        }
-
-        AppState::MainMenu => {
-            audio.play_with_settings(
-                asset_server.load("music/menu-loop.ogg"),
-                PlaybackSettings {
-                    repeat: true,
-                    volume: 0.75,
-                    speed: 1.0,
-                },
-            );
-        }
-        // AppState::Build => {
-        //     audio.play_with_settings(
-        //        ...
-        //         PlaybackSettings {
-        //             repeat: true,
-        //             volume: 0.75,
-        //             speed: 1.0,
-        //         },
-        //     );
-        // }
-        // AppState::Attack => {
-        //     audio.play_with_settings(
-        //         ...
-        //         PlaybackSettings {
-        //             repeat: true,
-        //             volume: 0.75,
-        //             speed: 1.0,
-        //         },
-        //     );
-        // }
-        _ => {}
     }
 }
