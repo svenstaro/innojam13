@@ -1,7 +1,7 @@
-use bevy::{prelude::*, sprite::MaterialMesh2dBundle, ecs::schedule::ShouldRun};
+use bevy::{ecs::schedule::ShouldRun, prelude::*, sprite::MaterialMesh2dBundle};
 use bevy_rapier2d::prelude::*;
 
-use crate::{WORLD_SIZE, game_state::AppState};
+use crate::{game_state::AppState, WORLD_SIZE};
 
 pub struct LevelPlugin;
 
@@ -16,23 +16,45 @@ pub struct LevelComponent;
 
 impl Plugin for LevelPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_enter(AppState::Build).with_run_criteria(spawn_level_run_criterium).with_system(setup_map));
+        app.add_system_set(
+            SystemSet::on_enter(AppState::Build)
+                .with_run_criteria(spawn_level_run_criterium)
+                .with_system(setup_map),
+        );
 
-        app.add_system_set(SystemSet::on_exit(AppState::Build).with_run_criteria(despawn_level_run_criterium).with_system(cleanup_system::<LevelComponent>));
-        app.add_system_set(SystemSet::on_exit(AppState::Attack).with_run_criteria(despawn_level_run_criterium).with_system(cleanup_system::<LevelComponent>));
+        app.add_system_set(
+            SystemSet::on_exit(AppState::Build)
+                .with_run_criteria(despawn_level_run_criterium)
+                .with_system(cleanup_system::<LevelComponent>),
+        );
+        app.add_system_set(
+            SystemSet::on_exit(AppState::Attack)
+                .with_run_criteria(despawn_level_run_criterium)
+                .with_system(cleanup_system::<LevelComponent>),
+        );
     }
 }
 
-fn spawn_level_run_criterium(app_state: Res<State<AppState>>, level_query: Query<&LevelComponent>) -> ShouldRun {
-    if (*app_state.current() == AppState::Build || *app_state.current() == AppState::Attack) && level_query.is_empty() {
+fn spawn_level_run_criterium(
+    app_state: Res<State<AppState>>,
+    level_query: Query<&LevelComponent>,
+) -> ShouldRun {
+    if (*app_state.current() == AppState::Build || *app_state.current() == AppState::Attack)
+        && level_query.is_empty()
+    {
         ShouldRun::Yes
     } else {
         ShouldRun::No
     }
 }
 
-fn despawn_level_run_criterium(app_state: Res<State<AppState>>, level_query: Query<&LevelComponent>) -> ShouldRun {
-    if (*app_state.current() != AppState::Build && *app_state.current() != AppState::Attack) && !level_query.is_empty() {
+fn despawn_level_run_criterium(
+    app_state: Res<State<AppState>>,
+    level_query: Query<&LevelComponent>,
+) -> ShouldRun {
+    if (*app_state.current() != AppState::Build && *app_state.current() != AppState::Attack)
+        && !level_query.is_empty()
+    {
         ShouldRun::Yes
     } else {
         ShouldRun::No
@@ -45,8 +67,6 @@ fn cleanup_system<T: Component>(mut commands: Commands, q: Query<Entity, With<T>
         commands.entity(e).despawn_recursive();
     }
 }
-
-
 
 fn create_chunk(
     commands: &mut Commands,
@@ -92,15 +112,18 @@ fn setup_map(
 
     let window_width = window.width() as f32;
     let window_height = window.height() as f32;
-    commands.spawn_bundle(SpriteBundle {
-        texture: asset_server.load("items/Background.png"),
-        sprite: Sprite {
-            custom_size: Some(Vec2::splat(2.0)),
+    commands
+        .spawn_bundle(SpriteBundle {
+            texture: asset_server.load("items/Background.png"),
+            sprite: Sprite {
+                custom_size: Some(Vec2::splat(2.0)),
+                ..default()
+            },
+            transform: Transform::from_xyz(WORLD_SIZE.x / 2.0, WORLD_SIZE.y / 2.0, 0.05)
+                .with_scale(Vec3::new(WORLD_SIZE.x, WORLD_SIZE.y, 1.0)),
             ..default()
-        },
-        transform: Transform::from_xyz(WORLD_SIZE.x / 2.0, WORLD_SIZE.y / 2.0, 0.05).with_scale(Vec3::new(WORLD_SIZE.x, WORLD_SIZE.y, 1.0)),
-        ..default()
-    }).insert(LevelComponent);
+        })
+        .insert(LevelComponent);
 
     // background
     // let quad = shape::Quad::new(WORLD_SIZE + Vec2::new(400.0, 400.0));
@@ -163,11 +186,11 @@ fn setup_map(
     //left
     create_chunk(
         &mut commands,
-        100.0,
         WORLD_SIZE.y,
+        100.0,
         -200.0,
         0.0,
-        0.0,
+        90.0,
         &mut meshes,
         &mut materials,
         true,
@@ -176,11 +199,11 @@ fn setup_map(
     //right
     create_chunk(
         &mut commands,
-        100.0,
         WORLD_SIZE.y,
+        100.0,
         WORLD_SIZE.x + 200.0,
         0.0,
-        0.0,
+        90.0,
         &mut meshes,
         &mut materials,
         true,
