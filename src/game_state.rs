@@ -4,7 +4,7 @@ use crate::{level::Base, enemy::Enemy};
 
 pub struct GameStatePlugin;
 
-const KILL_DIST: f32 = 30.0;
+const KILL_DIST: f32 = 170.0;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum AppState {
@@ -35,12 +35,16 @@ impl Plugin for GameStatePlugin {
 
 fn check_game_over(mut commands: Commands, base_query: Query<&Transform, With<Base>>, enemy_query: Query<&Transform, With<Enemy>>, mut app_state: ResMut<State<AppState>>, mut wave_controler: ResMut<WaveControler>) {
     if base_query.is_empty() {
+        println!("no base in scene");
         return;
     }
     let base_pos = base_query.single().translation;
     for enemy_trans in enemy_query.iter() {
         let enemy_pos = enemy_trans.translation;
-        if base_pos.distance(enemy_pos) < KILL_DIST && *app_state.current() != AppState::GameOver{
+        let enemy_dist = base_pos.distance(enemy_pos);
+        dbg!(enemy_dist);
+        if enemy_dist < KILL_DIST && *app_state.current() != AppState::GameOver{
+            println!("gameover");
             wave_controler.wave_size = 1;
             app_state.set(AppState::Intro).unwrap();
         }
