@@ -1,6 +1,6 @@
 use attack_state::AttackStatePlugin;
 use bevy::{audio::AudioPlugin, math::vec3, prelude::*};
-
+use bevy::{math::vec2, prelude::*};
 use attack_system::AttackSystemPlugin;
 use bevy_easings::EasingsPlugin;
 use bevy_rapier2d::prelude::*;
@@ -57,9 +57,12 @@ fn main() {
         .run();
 }
 
-fn setup_graphics(mut commands: Commands) {
-    commands
-        .spawn_bundle(Camera2dBundle {
+fn setup_graphics(mut commands: Commands, assets: Res<AssetServer>) {
+    commands.spawn_bundle(SpriteBundle {
+           texture: assets.load("items/Background.png"),
+           ..default()
+        });
+        commands.spawn_bundle(Camera2dBundle {
             transform: Transform::from_translation(vec3(
                 WORLD_SIZE.x / 2.0,
                 WORLD_SIZE.y / 2.0,

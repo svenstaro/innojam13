@@ -153,6 +153,7 @@ fn spawn_enemy_at(commands: &mut Commands, asset_server: &Res<AssetServer>, pos:
             transform: Transform::from_scale(Vec3::new(size, size, 1.0)).with_translation(pos),
             ..default()
         })
+        // what is this for?
         .insert(
             Sprite {
                 custom_size: Some(Vec2::splat(1.0)),
