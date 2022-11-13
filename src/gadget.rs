@@ -63,20 +63,25 @@ fn handle_spawn_cannons(
                 shots_per_second: 10.0,
             };
 
-            let barrel_entity = commands
-                .spawn_bundle(MaterialMesh2dBundle {
-                    mesh: meshes
-                        .add(Mesh::from(shape::Quad::new(Vec2::new(0.3, 1.0))))
-                        .into(),
-                    material: materials.add(ColorMaterial::from(Color::BLUE)),
-                    transform: Transform::from_xyz(position.x, position.y, 1.0)
-                        .with_scale(Vec3::splat(200.0)),
+            commands
+                .spawn()
+                .insert_bundle(SpriteBundle {
+                    sprite: Sprite {
+                        custom_size: Some(Vec2::splat(1.0)),
+                        ..default()
+                    },
+                    texture: asset_server.load("items/CanonWater.png"),
+                    transform: Transform::from_scale(Vec3::new(379.0, 512.0, 1.0))
+                        .with_translation(Vec3::ONE),
                     ..default()
                 })
-                .insert(cannon_component)
+                .insert(Sprite {
+                    custom_size: Some(Vec2::splat(0.5)),
+                    ..default()
+                })
+                // .insert(cannon_component)
                 .insert(Gadget { is_placed: false })
-                .insert(GadgetPart { is_placed: false })
-                .id();
+                .insert(GadgetPart { is_placed: false });
         }
     };
 }

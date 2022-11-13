@@ -2,7 +2,7 @@ use bevy::{math::vec3, prelude::*};
 
 use crate::{
     gadget::{shoot_water, Gadget},
-    polishing_constants::GADGET_MIN_DISTANCE,
+    polishing_constants::{GADGET_MIN_DISTANCE, SHOOTING_CHANCE},
 };
 
 pub struct AttackSystemPlugin;
@@ -28,7 +28,7 @@ fn attack_system(
         //new variable random value between 0 and 1
         let random_value = rand::random::<f32>();
 
-        if random_value < 0.75 {
+        if random_value < SHOOTING_CHANCE {
             continue;
         }
 
