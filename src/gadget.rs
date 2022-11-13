@@ -24,6 +24,9 @@ pub struct GadgetPart {
     is_placed: bool,
 }
 
+#[derive(Component, Default)]
+pub struct Water;
+
 #[derive(Component)]
 pub struct CannonGadget {
     emission_strength: f32,
@@ -212,6 +215,7 @@ pub fn shoot_water(
             torque_impulse: 0.0,
         })
         .insert(LevelComponent)
+        .insert(Water)
         .insert_bundle(MaterialMesh2dBundle {
             mesh: meshes.add(Mesh::from(shape::Circle::default())).into(),
             transform: Transform::from_xyz(shoot_pos.x, shoot_pos.y, 0.96)
