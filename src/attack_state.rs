@@ -1,12 +1,17 @@
 use bevy::{math::vec3, prelude::*};
 
-use crate::{AppState, WORLD_SIZE, enemy::{SpawnWaveEvent, Enemy}, game_state::WaveControler};
+use crate::{
+    enemy::{Enemy, SpawnWaveEvent},
+    gadget::Water,
+    game_state::WaveControler,
+    polishing_constants::ATTACK_COUNTDOWN,
+    AppState, WORLD_SIZE,
+};
 
 #[derive(Component)]
 struct AttackStateCountdown {
     pub countdown: f64,
 }
-
 
 #[derive(Component)]
 pub struct AttackStateText;
@@ -38,7 +43,12 @@ fn attack_system(
     }
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>, mut spawn_wave_events: EventWriter<SpawnWaveEvent>, mut wave_controler: ResMut<WaveControler>) {
+fn setup(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut spawn_wave_events: EventWriter<SpawnWaveEvent>,
+    mut wave_controler: ResMut<WaveControler>,
+) {
     spawn_wave_events.send(SpawnWaveEvent::new(wave_controler.wave_size));
     wave_controler.wave_size += 1;
     let font = asset_server.load("fonts/Oswald-SemiBold.ttf");
@@ -75,7 +85,9 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, mut spawn_wave_
             },
             ..default()
         })
-        .insert(AttackStateCountdown { countdown: 20.0 });
+        .insert(AttackStateCountdown {
+            countdown: ATTACK_COUNTDOWN,
+        });
 }
 
 fn cleanup(
@@ -83,6 +95,7 @@ fn cleanup(
     mut timer_q: Query<(Entity, &mut AttackStateCountdown)>,
     mut text_q: Query<(Entity, &mut AttackStateText)>,
     mut enemy_q: Query<Entity, With<Enemy>>,
+    mut water_q: Query<Entity, With<Water>>,
 ) {
     let (entity, _) = timer_q.single_mut();
     commands.entity(entity).despawn_recursive();
@@ -92,6 +105,10 @@ fn cleanup(
     commands.entity(entity).despawn_recursive();
 
     for entity in enemy_q.iter() {
+        commands.entity(entity).despawn_recursive();
+    }
+
+    for entity in water_q.iter() {
         commands.entity(entity).despawn_recursive();
     }
 }
