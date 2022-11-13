@@ -102,11 +102,11 @@ fn setup_map(
 
     // Colliders around the map to prevent eveything from leaving the map
     // bottom
-    create_chunk(&mut commands, WORLD_SIZE.0, 100.0, 0.0, -100.0, 0.0, &mut meshes, &mut materials, true);
+    create_chunk(&mut commands, WORLD_SIZE.0 + 200.0, 100.0, 0.0, -100.0, 0.0, &mut meshes, &mut materials, true);
     //top
-    create_chunk(&mut commands, WORLD_SIZE.0, 100.0, 0.0, WORLD_SIZE.1 + 100.0, 0.0, &mut meshes, &mut materials, true);
+    create_chunk(&mut commands, WORLD_SIZE.0 + 200.0, 100.0, 0.0, WORLD_SIZE.1 + 100.0, 0.0, &mut meshes, &mut materials, true);
     //left
-    create_chunk(&mut commands, 100.0, WORLD_SIZE.1, -200.0, WORLD_SIZE.1, 0.0, &mut meshes, &mut materials, true);
+    create_chunk(&mut commands, 100.0, WORLD_SIZE.1, -200.0, 0.0, 0.0, &mut meshes, &mut materials, true);
     //right
     create_chunk(&mut commands, 100.0,WORLD_SIZE.1 , WORLD_SIZE.0 + 200.0, 0.0, 0.0, &mut meshes, &mut materials, true);
 
