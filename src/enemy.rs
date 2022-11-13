@@ -23,10 +23,12 @@ impl Default for WaveConfig {
             timer: Timer::new(Duration::from_secs(2), true),
         }
     }
+
+    
 }
 
 impl WaveConfig {
-    fn new(count: u32) -> Self {
+    pub fn new(count: u32) -> Self {
         WaveConfig {
             count_remaining: count,
             timer: Timer::new(Duration::from_secs(2), true),
@@ -39,8 +41,10 @@ pub struct SpawnWaveEvent {
     wave_cfg: WaveConfig,
 }
 
+
+
 impl SpawnWaveEvent {
-    fn new(count: u32) -> Self {
+    pub fn new(count: u32) -> Self {
         SpawnWaveEvent {
             wave_cfg: WaveConfig::new(count),
         }
@@ -85,7 +89,11 @@ fn spawn_new_wave_on_event(
     // Play a sound once per frame if a collision occurred.
 
     for wave_ev in spawn_wave_events.iter() {
-        commands.insert_resource(wave_ev.wave_cfg.clone());
+        let mut wave_cfg = wave_ev.wave_cfg.clone();
+        let fountain_pos = fountain_query.single().translation;
+        spawn_enemy_at(&mut commands, &asset_server, fountain_pos, 120.0);
+        wave_cfg.count_remaining -= 1;
+        commands.insert_resource(wave_cfg);
     }
 }
 

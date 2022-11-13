@@ -1,11 +1,12 @@
 use bevy::{math::vec3, prelude::*};
 
-use crate::{AppState, WORLD_SIZE, enemy::SpawnWaveEvent};
+use crate::{AppState, WORLD_SIZE, enemy::SpawnWaveEvent, game_state::WaveControler};
 
 #[derive(Component)]
 struct AttackStateCountdown {
     pub countdown: f64,
 }
+
 
 #[derive(Component)]
 pub struct AttackStateText;
@@ -37,9 +38,9 @@ fn attack_system(
     }
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>, mut spawn_wave_events: EventWriter<SpawnWaveEvent>,) {
-    
-    spawn_wave_events.send_default();
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>, mut spawn_wave_events: EventWriter<SpawnWaveEvent>, mut wave_controler: ResMut<WaveControler>) {
+    spawn_wave_events.send(SpawnWaveEvent::new(wave_controler.wave_size));
+    wave_controler.wave_size += 1;
     let font = asset_server.load("fonts/Oswald-SemiBold.ttf");
     let text_style = TextStyle {
         font: font.clone(),
