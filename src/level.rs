@@ -27,27 +27,25 @@ fn create_chunk(
     meshes: &mut Assets<Mesh>,
     materials: &mut ResMut<Assets<ColorMaterial>>,
     add_collider: bool,
+    asset_server: &Res<AssetServer>,
 ) {
     let entity = commands
         .spawn()
-        .insert_bundle(MaterialMesh2dBundle {
-            mesh: meshes
-                .add(Mesh::from(shape::Quad::new(Vec2::new(
-                    width * 2.0,
-                    height * 2.0,
-                ))))
-                .into(),
-            material: materials.add(ColorMaterial::from(Color::hex("43A8BA").unwrap())),
-            transform: Transform::from_xyz(position_x, position_y, 0.9)
+        .insert_bundle(SpriteBundle {
+            sprite: Sprite {
+                custom_size: Some(Vec2::splat(2.0)),
+                ..default()
+            },
+            texture: asset_server.load("items/LowerTile.png"),
+            transform: Transform::from_scale(Vec3::new(width, height, 1.0))
+                .with_translation(Vec3::new(position_x, position_y, 0.0))
                 .with_rotation(Quat::from_rotation_z(rotation.to_radians())),
             ..default()
         })
         .id();
 
     if add_collider {
-        commands
-            .entity(entity)
-            .insert(Collider::cuboid(width, height));
+        commands.entity(entity).insert(Collider::cuboid(1.0, 1.0));
     }
 }
 
@@ -56,6 +54,7 @@ fn setup_map(
     windows: Res<Windows>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    asset_server: Res<AssetServer>,
 ) {
     let window = windows.get_primary().unwrap();
 
@@ -103,6 +102,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         true,
+        &asset_server,
     );
     //top
     create_chunk(
@@ -115,6 +115,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         true,
+        &asset_server,
     );
     //left
     create_chunk(
@@ -127,6 +128,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         true,
+        &asset_server,
     );
     //right
     create_chunk(
@@ -139,6 +141,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         true,
+        &asset_server,
     );
 
     // ground
@@ -152,6 +155,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         true,
+        &asset_server,
     );
 
     // cave exit enemies left and right
@@ -166,6 +170,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         true,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -177,6 +182,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         true,
+        &asset_server,
     );
 
     // chunks for walking; not rotated; from lowest to highest
@@ -191,6 +197,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         true,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -202,6 +209,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         true,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -213,6 +221,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         true,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -224,6 +233,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         true,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -235,6 +245,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         true,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -246,6 +257,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         true,
+        &asset_server,
     );
 
     // chunks for walking up, from lowest to highest
@@ -259,6 +271,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         true,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -270,6 +283,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         true,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -281,6 +295,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         true,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -292,6 +307,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         true,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -303,6 +319,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         true,
+        &asset_server,
     );
 
     // ladder priority one: from right to to left, priority second: from lowest to highest
@@ -318,6 +335,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -329,6 +347,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -340,6 +359,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -351,6 +371,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -362,6 +383,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
 
     //first
@@ -375,6 +397,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -386,6 +409,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -397,6 +421,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -408,6 +433,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -419,6 +445,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
 
     //last
@@ -432,6 +459,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -443,6 +471,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -454,6 +483,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -465,6 +495,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
 
     //last
@@ -478,6 +509,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -489,6 +521,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -500,6 +533,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -511,6 +545,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -522,6 +557,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
 
     //vorletzter
@@ -535,6 +571,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -546,6 +583,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -557,6 +595,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -568,6 +607,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -579,6 +619,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
 
     //last
@@ -592,6 +633,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -603,6 +645,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -614,6 +657,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -625,6 +669,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -636,6 +681,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -647,6 +693,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -658,6 +705,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
     create_chunk(
         &mut commands,
@@ -669,6 +717,7 @@ fn setup_map(
         &mut meshes,
         &mut materials,
         false,
+        &asset_server,
     );
 }
 
