@@ -52,13 +52,34 @@ fn attack_system(
         //now we have the nearest enemy
         // shoot wa'er
         if let Some(pos) = enemy_position {
-            shoot_water(
-                transform.translation,
-                pos,
-                &mut meshes,
-                &mut materials,
-                &mut commands,
-            );
+            if !is_shooting_down(transform.translation.truncate(), pos.truncate()) {
+                shoot_water(
+                    transform.translation,
+                    pos,
+                    &mut meshes,
+                    &mut materials,
+                    &mut commands,
+                );
+            } 
         }
+    }
+
+    fn is_shooting_down(cannon_pos: Vec2, enemy_pos: Vec2) -> bool {
+        let direction_vec = (enemy_pos - cannon_pos).normalize();
+
+        if direction_vec.y > 0.0 {
+            return false;
+        }
+
+        let a = Vec2::X;
+        let b = direction_vec;
+
+        let angle = (a.dot(b) / (a.length() * b.length())).acos().to_degrees();
+
+        dbg!(angle);
+
+        angle > 20.0 && angle < 160.0
+
+
     }
 }
