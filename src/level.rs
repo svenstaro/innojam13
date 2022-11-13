@@ -92,15 +92,24 @@ fn setup_map(
 
     let window_width = window.width() as f32;
     let window_height = window.height() as f32;
-
-    // background
-    let quad = shape::Quad::new(WORLD_SIZE + Vec2::new(400.0, 400.0));
-    commands.spawn_bundle(MaterialMesh2dBundle {
-        mesh: meshes.add(Mesh::from(quad)).into(),
-        material: materials.add(ColorMaterial::from(Color::hex("0C1E21").unwrap())),
-        transform: Transform::from_xyz(WORLD_SIZE.x / 2.0, WORLD_SIZE.y / 2.0, 0.0),
+    commands.spawn_bundle(SpriteBundle {
+        texture: asset_server.load("items/Background.png"),
+        sprite: Sprite {
+            custom_size: Some(Vec2::splat(2.0)),
+            ..default()
+        },
+        transform: Transform::from_xyz(WORLD_SIZE.x / 2.0, WORLD_SIZE.y / 2.0, 0.05).with_scale(Vec3::new(WORLD_SIZE.x, WORLD_SIZE.y, 1.0)),
         ..default()
     }).insert(LevelComponent);
+
+    // background
+    // let quad = shape::Quad::new(WORLD_SIZE + Vec2::new(400.0, 400.0));
+    // commands.spawn_bundle(MaterialMesh2dBundle {
+    //     mesh: meshes.add(Mesh::from(quad)).into(),
+    //     material: materials.add(ColorMaterial::from(Color::hex("0C1E21").unwrap())),
+    //     transform: Transform::from_xyz(WORLD_SIZE.x / 2.0, WORLD_SIZE.y / 2.0, 0.0),
+    //     ..default()
+    // }).insert(LevelComponent);
 
     let fountain_offset = Transform::from_xyz(180.0, 135.0, 1.0);
     commands
@@ -181,7 +190,7 @@ fn setup_map(
     // ground
     create_chunk(
         &mut commands,
-        1600.0,
+        1530.0,
         35.0,
         1600.0,
         50.0,

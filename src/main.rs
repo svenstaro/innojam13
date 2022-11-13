@@ -59,10 +59,7 @@ fn main() {
 }
 
 fn setup_graphics(mut commands: Commands, assets: Res<AssetServer>) {
-    commands.spawn_bundle(SpriteBundle {
-        texture: assets.load("items/Background.png"),
-        ..default()
-    });
+  
     commands
         .spawn_bundle(Camera2dBundle {
             transform: Transform::from_translation(vec3(
