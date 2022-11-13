@@ -119,7 +119,7 @@ fn setup_map(
                 custom_size: Some(Vec2::splat(2.0)),
                 ..default()
             },
-            transform: Transform::from_xyz(WORLD_SIZE.x / 2.0, WORLD_SIZE.y / 2.0, 0.05)
+            transform: Transform::from_xyz(WORLD_SIZE.x / 2.0, WORLD_SIZE.y / 2.0 + 1000.0, 0.05)
                 .with_scale(Vec3::new(WORLD_SIZE.x, WORLD_SIZE.y, 1.0)),
             ..default()
         })
