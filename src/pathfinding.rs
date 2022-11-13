@@ -84,12 +84,16 @@ fn get_force_from_navmesh(
     let sample_position = sample_position.truncate();
 
     loop {
+        if agent.current_idx >= (navmesh.nodes.len() - 1) {
+            return Vec2::ZERO;
+         }
         let current_node = navmesh.nodes[agent.current_idx];
         let dir = current_node - sample_position;
         let dist = current_node.distance(sample_position);
 
         if dist < 50.0 {
-            agent.current_idx = (agent.current_idx + 1).min(navmesh.nodes.len() - 1);
+            agent.current_idx = agent.current_idx + 1;
+            
             continue;
         }
         return dir.normalize() * agent.move_strength;

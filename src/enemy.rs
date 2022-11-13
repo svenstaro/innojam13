@@ -21,10 +21,10 @@ impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_event::<SpawnWaveEvent>()
-            .add_system(spawn_new_wave_on_event)
+            .add_system(spawn_new_wave_on_event);
 
             // Enemy processes.
-            .add_system(fountain_spawns_things);
+            // .add_system(fountain_spawns_things);
     }
 }
 
@@ -103,7 +103,7 @@ fn spawn_enemy_at(commands: &mut Commands, asset_server: &Res<AssetServer>, pos:
         })
         .insert(Enemy)
         .insert(EnemyType::Grunt)
-        .insert(PathfindingAgent::new(200.0))
+        .insert(PathfindingAgent::new(400.0))
         .insert_bundle(SpriteBundle {
             sprite: Sprite {
                 custom_size: Some(Vec2::splat(1.0)),
