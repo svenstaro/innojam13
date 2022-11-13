@@ -29,7 +29,7 @@ const SNAP_ON_DIST: f32 = 300.0;
 impl Plugin for GadgetPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<SpawnCannonGadgetEvent>()
-            .add_system(shoot_water)
+            .add_system(shoot_water_system)
             .add_system(on_gadget_placment_status_change)
             .add_system(handle_spawn_cannons)
             .add_system(update_gadget_placement);
@@ -89,8 +89,9 @@ fn update_gadget_placement(
                 gadget.is_placed = true;
             }
             if !gadget.is_placed {
-                let position = snap_to_surface(position);
-                gadget_transform.translation = Vec3::new(position.x, position.y, 1.0);
+                if let Some(position) = snap_to_surface(position) {
+                    gadget_transform.translation = Vec3::new(position.x, position.y, 1.0);
+                }
             }
         }
     }
