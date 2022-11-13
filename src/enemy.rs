@@ -23,8 +23,6 @@ impl Default for WaveConfig {
             timer: Timer::new(Duration::from_secs(2), true),
         }
     }
-
-    
 }
 
 impl WaveConfig {
@@ -41,8 +39,6 @@ pub struct SpawnWaveEvent {
     wave_cfg: WaveConfig,
 }
 
-
-
 impl SpawnWaveEvent {
     pub fn new(count: u32) -> Self {
         SpawnWaveEvent {
@@ -58,7 +54,7 @@ fn rand_f32(l: f32, u: f32) -> f32 {
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<SpawnWaveEvent>()
-        .init_resource::<WaveConfig>()
+            .init_resource::<WaveConfig>()
             .add_system(spawn_new_wave_on_event)
             .add_system_set(SystemSet::on_update(AppState::Attack).with_system(check_for_spawn));
         // Enemy processes.
@@ -105,7 +101,7 @@ fn check_for_spawn(
     fountain_query: Query<&Transform, With<Fountain>>,
 ) {
     wave_cfg.timer.tick(time.delta());
-    if wave_cfg.count_remaining > 0 && wave_cfg.timer.just_finished(){
+    if wave_cfg.count_remaining > 0 && wave_cfg.timer.just_finished() {
         let fountain_pos = fountain_query.single().translation;
         spawn_enemy_at(&mut commands, &asset_server, fountain_pos, 120.0);
         wave_cfg.count_remaining -= 1;
@@ -143,7 +139,7 @@ fn spawn_enemy_at(commands: &mut Commands, asset_server: &Res<AssetServer>, pos:
         })
         .insert(Enemy)
         .insert(EnemyType::Grunt)
-        .insert(PathfindingAgent::new(400.0))
+        .insert(PathfindingAgent::new(700.0)) //constant
         .insert_bundle(SpriteBundle {
             sprite: Sprite {
                 custom_size: Some(Vec2::splat(1.0)),

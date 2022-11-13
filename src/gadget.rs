@@ -42,7 +42,7 @@ fn handle_spawn_cannons(
     app_state: Res<State<AppState>>,
     windows: Res<Windows>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-    asset_server: &Res<AssetServer>,
+    asset_server: Res<AssetServer>,
 ) {
     if spawn_cannon_events.is_empty() || *app_state.current() != AppState::Build {
         return;
