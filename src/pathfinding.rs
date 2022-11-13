@@ -117,7 +117,7 @@ impl Plugin for PathfindingPlugin {
             ],
             0.1,
         ));
-        app.add_startup_system(init_nav_mesh_debug);
+        // app.add_startup_system(init_nav_mesh_debug);
         app.add_system(update_pathfinding_agent);
     }
 }

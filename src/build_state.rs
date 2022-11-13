@@ -50,7 +50,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             text: Text::from_section("Build phase", text_style)
                 .with_alignment(TextAlignment::CENTER),
             transform: Transform {
-                translation: vec3(WORLD_SIZE.0 / 2.0, WORLD_SIZE.1 - 400.0, 0.0),
+                translation: vec3(WORLD_SIZE.0 / 2.0, WORLD_SIZE.1 - 400.0, 0.95),
                 ..default()
             },
             ..default()
@@ -67,7 +67,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         .spawn_bundle(Text2dBundle {
             text: Text::from_section("lol", text_style).with_alignment(TextAlignment::TOP_LEFT),
             transform: Transform {
-                translation: vec3(WORLD_SIZE.0 / 2.0 - 150.0, WORLD_SIZE.1 - 600.0, 0.0),
+                translation: vec3(WORLD_SIZE.0 / 2.0 - 150.0, WORLD_SIZE.1 - 600.0, 0.95),
                 ..default()
             },
             ..default()

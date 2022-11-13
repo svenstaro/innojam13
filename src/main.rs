@@ -44,7 +44,7 @@ fn main() {
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(
             PIXELS_PER_METER,
         ))
-        .add_plugin(RapierDebugRenderPlugin::default())
+        // .add_plugin(RapierDebugRenderPlugin::default())
         .add_plugin(GameStatePlugin)
         .add_plugin(MainMenuPlugin)
         .add_plugin(BuildStatePlugin)
