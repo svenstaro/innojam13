@@ -1,7 +1,7 @@
 use attack_state::AttackStatePlugin;
+use attack_system::AttackSystemPlugin;
 use bevy::{audio::AudioPlugin, math::vec3, prelude::*};
 use bevy::{math::vec2, prelude::*};
-use attack_system::AttackSystemPlugin;
 use bevy_easings::EasingsPlugin;
 use bevy_rapier2d::prelude::*;
 use build_state::BuildStatePlugin;
@@ -14,6 +14,7 @@ use input::InputPlugin as GameInputPlugin;
 
 use level::LevelPlugin;
 use pathfinding::PathfindingPlugin;
+use polishing_constants::PIXELS_PER_METER_POLISHING;
 
 mod attack_state;
 mod attack_system;
@@ -25,12 +26,12 @@ mod input;
 mod level;
 mod menu;
 mod pathfinding;
-
+mod polishing_constants;
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Component)]
 pub struct MainCamera;
 
 pub const WORLD_SIZE: Vec2 = Vec2::new(3400.0, 2000.0);
-const PIXELS_PER_METER: f32 = 200.0; //const
+const PIXELS_PER_METER: f32 = PIXELS_PER_METER_POLISHING;
 
 fn main() {
     App::new()
@@ -59,10 +60,11 @@ fn main() {
 
 fn setup_graphics(mut commands: Commands, assets: Res<AssetServer>) {
     commands.spawn_bundle(SpriteBundle {
-           texture: assets.load("items/Background.png"),
-           ..default()
-        });
-        commands.spawn_bundle(Camera2dBundle {
+        texture: assets.load("items/Background.png"),
+        ..default()
+    });
+    commands
+        .spawn_bundle(Camera2dBundle {
             transform: Transform::from_translation(vec3(
                 WORLD_SIZE.x / 2.0,
                 WORLD_SIZE.y / 2.0,

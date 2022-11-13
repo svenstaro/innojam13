@@ -1,6 +1,9 @@
 use bevy::{math::vec3, prelude::*};
 
-use crate::gadget::{shoot_water, Gadget};
+use crate::{
+    gadget::{shoot_water, Gadget},
+    polishing_constants::GADGET_MIN_DISTANCE,
+};
 
 pub struct AttackSystemPlugin;
 
@@ -42,8 +45,7 @@ fn attack_system(
             }
         }
 
-        if min_distance > 1000.0 {
-            //constants
+        if min_distance > GADGET_MIN_DISTANCE {
             continue;
         }
 

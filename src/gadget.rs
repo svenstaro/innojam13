@@ -1,7 +1,12 @@
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use bevy_rapier2d::prelude::*;
 
-use crate::{game_state::AppState, input::get_world_cursor_pos, MainCamera};
+use crate::{
+    game_state::AppState,
+    input::get_world_cursor_pos,
+    polishing_constants::{WATER_SIZE, WATER_STRENGTH},
+    MainCamera,
+};
 
 #[derive(Debug, Default)]
 pub struct SpawnCannonGadgetEvent;
@@ -190,13 +195,13 @@ pub fn shoot_water(
         ))
         .insert(Restitution::coefficient(0.1))
         .insert(ExternalImpulse {
-            impulse: (target_pos - shoot_pos).truncate().normalize() * 20.0, //constants
+            impulse: (target_pos - shoot_pos).truncate().normalize() * WATER_STRENGTH,
             torque_impulse: 0.0,
         })
         .insert_bundle(MaterialMesh2dBundle {
             mesh: meshes.add(Mesh::from(shape::Circle::default())).into(),
             transform: Transform::from_xyz(shoot_pos.x, shoot_pos.y, 0.96)
-                .with_scale(Vec3::splat(30.)), //const
+                .with_scale(Vec3::splat(WATER_SIZE)),
             material: materials.add(ColorMaterial::from(Color::hex("27636E").unwrap())),
             ..default()
         });
