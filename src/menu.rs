@@ -6,6 +6,9 @@ use crate::AppState;
 
 pub struct MainMenuPlugin;
 
+#[derive(Component)]
+struct CurrentUi;
+
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Default)]
 struct MenuData(Option<Entity>);
 #[derive(Component, Debug)]
@@ -23,15 +26,20 @@ impl Plugin for MainMenuPlugin {
         app.add_system(button_press_system)
             .init_resource::<MenuData>()
             .add_state(MenuData::default())
-            .add_system_set(
-                SystemSet::on_update(AppState::MainMenu).with_system(button_press_system),
-            )
             .add_system_set(SystemSet::on_enter(AppState::Intro).with_system(spawn_intro))
             .add_system_set(
                 SystemSet::on_update(AppState::Intro).with_system(poll_intro_timer_over),
             ) // or spawn main menu directly?
-            .add_system_set(SystemSet::on_exit(AppState::Intro).with_system(spawn_main_menu))
-            .add_system_set(SystemSet::on_exit(AppState::MainMenu).with_system(despawn_main_menu))
+            .add_system_set(
+                SystemSet::on_exit(AppState::Intro).with_system(cleanup_system::<CurrentUi>),
+            )
+            .add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(spawn_main_menu))
+            .add_system_set(
+                SystemSet::on_update(AppState::MainMenu).with_system(button_press_system),
+            )
+            .add_system_set(
+                SystemSet::on_exit(AppState::MainMenu).with_system(cleanup_system::<CurrentUi>),
+            )
             .add_system(main_menu_controls);
     }
 }
@@ -154,6 +162,7 @@ fn spawn_intro(
 ) {
     let ui_root = commands
         .spawn_bundle(root())
+        .insert(CurrentUi)
         .with_children(|parent| {
             // left vertical fill (border)
             parent.spawn_bundle(border()).with_children(|parent| {
@@ -189,7 +198,16 @@ fn spawn_main_menu(
     menu_background_query: Query<Entity, With<Background>>,
     asset_server: Res<AssetServer>,
 ) {
-    let entity = menu_background_query.single();
+    let entity = commands.spawn_bundle(menu_background()).id();
+
+    let ui_root = commands
+        .spawn_bundle(root())
+        .insert(CurrentUi)
+        .with_children(|parent| {
+            // left vertical fill (border)
+            parent.spawn_bundle(border()).push_children(&[entity]);
+        });
+
     commands.entity(entity).despawn_descendants();
     commands.entity(entity).with_children(|parent| {
         parent
@@ -224,5 +242,12 @@ fn main_menu_controls(mut keys: ResMut<Input<KeyCode>>, mut app_state: ResMut<St
             app_state.set(AppState::Intro).unwrap();
             keys.reset(KeyCode::Escape);
         }
+    }
+}
+
+
+fn cleanup_system<T: Component>(mut commands: Commands, q: Query<Entity, With<T>>) {
+    for e in q.iter() {
+        commands.entity(e).despawn_recursive();
     }
 }
