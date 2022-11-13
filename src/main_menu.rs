@@ -43,6 +43,8 @@ fn button_press_system(
 ) {
     for (interaction, button) in buttons.iter() {
         if *interaction == Interaction::Clicked {
+            //why is this called twice?
+            // thats why we can't expect here
             dbg!(button);
             match button {
                 MenuButton::Play => {
