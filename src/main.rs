@@ -1,6 +1,7 @@
 use attack_state::AttackStatePlugin;
 use bevy::{audio::AudioPlugin, math::vec3, prelude::*};
 
+use attack_system::AttackSystemPlugin;
 use bevy_easings::EasingsPlugin;
 use bevy_rapier2d::prelude::*;
 use build_state::BuildStatePlugin;
@@ -15,6 +16,7 @@ use level::LevelPlugin;
 use pathfinding::PathfindingPlugin;
 
 mod attack_state;
+mod attack_system;
 mod build_state;
 mod enemy;
 mod gadget;
@@ -27,7 +29,7 @@ mod pathfinding;
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Component)]
 pub struct MainCamera;
 
-pub const WORLD_SIZE: (f32, f32) = (3400.0, 2000.0);
+pub const WORLD_SIZE: Vec2 = Vec2::new(3400.0, 2000.0);
 const PIXELS_PER_METER: f32 = 100.0;
 
 fn main() {
@@ -50,6 +52,7 @@ fn main() {
         .add_plugin(MainMenuPlugin)
         .add_plugin(BuildStatePlugin)
         .add_plugin(AttackStatePlugin)
+        .add_plugin(AttackSystemPlugin)
         .add_startup_system(setup_graphics)
         .run();
 }
@@ -58,14 +61,14 @@ fn setup_graphics(mut commands: Commands) {
     commands
         .spawn_bundle(Camera2dBundle {
             transform: Transform::from_translation(vec3(
-                WORLD_SIZE.0 / 2.0,
-                WORLD_SIZE.1 / 2.0,
+                WORLD_SIZE.x / 2.0,
+                WORLD_SIZE.y / 2.0,
                 2.0,
             )),
             projection: OrthographicProjection {
                 scaling_mode: bevy::render::camera::ScalingMode::Auto {
-                    min_width: WORLD_SIZE.0,
-                    min_height: WORLD_SIZE.1,
+                    min_width: WORLD_SIZE.x,
+                    min_height: WORLD_SIZE.y,
                 },
                 ..default()
             },

@@ -53,7 +53,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, mut spawn_wave_
             text: Text::from_section("Attack phase", text_style)
                 .with_alignment(TextAlignment::CENTER),
             transform: Transform {
-                translation: vec3(WORLD_SIZE.0 / 2.0, WORLD_SIZE.1 - 400.0, 0.97),
+                translation: vec3(WORLD_SIZE.x / 2.0, WORLD_SIZE.y - 400.0, 0.97),
                 ..default()
             },
             ..default()
@@ -70,7 +70,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>, mut spawn_wave_
         .spawn_bundle(Text2dBundle {
             text: Text::from_section("lol", text_style).with_alignment(TextAlignment::TOP_LEFT),
             transform: Transform {
-                translation: vec3(WORLD_SIZE.0 / 2.0 - 150.0, WORLD_SIZE.1 - 600.0, 0.97),
+                translation: vec3(WORLD_SIZE.x / 2.0 - 150.0, WORLD_SIZE.y - 600.0, 0.97),
                 ..default()
             },
             ..default()
