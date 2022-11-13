@@ -81,8 +81,8 @@ fn setup_map(
         });
 
     let base_offset = Transform::from_xyz(
-        window_width / 2.0 - 50.0 - 10.0,
-        -window_height / 2.0 + 100.0 + 50.0 + 10.0,
+        1500.0, 
+        1800.0,
         0.0,
     );
     commands

@@ -76,7 +76,7 @@ enum EnemyType {
 }
 
 #[derive(Component, Debug, Default)]
-struct Enemy;
+pub struct Enemy;
 
 fn spawn_new_wave_on_event(
     mut spawn_wave_events: EventReader<SpawnWaveEvent>,
