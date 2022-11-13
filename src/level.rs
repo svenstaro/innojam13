@@ -1,7 +1,7 @@
-use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
+use bevy::{prelude::*, sprite::MaterialMesh2dBundle, ecs::schedule::ShouldRun};
 use bevy_rapier2d::prelude::*;
 
-use crate::WORLD_SIZE;
+use crate::{WORLD_SIZE, game_state::AppState};
 
 pub struct LevelPlugin;
 
@@ -11,11 +11,42 @@ pub struct Fountain;
 #[derive(Debug, Default, Component)]
 pub struct Base;
 
+#[derive(Debug, Default, Component)]
+pub struct LevelComponent;
+
 impl Plugin for LevelPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(setup_map);
+        app.add_system_set(SystemSet::on_enter(AppState::Build).with_run_criteria(spawn_level_run_criterium).with_system(setup_map));
+
+        app.add_system_set(SystemSet::on_exit(AppState::Build).with_run_criteria(despawn_level_run_criterium).with_system(cleanup_system::<LevelComponent>));
+        app.add_system_set(SystemSet::on_exit(AppState::Attack).with_run_criteria(despawn_level_run_criterium).with_system(cleanup_system::<LevelComponent>));
     }
 }
+
+fn spawn_level_run_criterium(app_state: Res<State<AppState>>, level_query: Query<&LevelComponent>) -> ShouldRun {
+    if (*app_state.current() == AppState::Build || *app_state.current() == AppState::Attack) && level_query.is_empty() {
+        ShouldRun::Yes
+    } else {
+        ShouldRun::No
+    }
+}
+
+fn despawn_level_run_criterium(app_state: Res<State<AppState>>, level_query: Query<&LevelComponent>) -> ShouldRun {
+    if (*app_state.current() != AppState::Build && *app_state.current() != AppState::Attack) && !level_query.is_empty() {
+        ShouldRun::Yes
+    } else {
+        ShouldRun::No
+    }
+}
+
+fn cleanup_system<T: Component>(mut commands: Commands, q: Query<Entity, With<T>>) {
+    println!("level cleanup");
+    for e in q.iter() {
+        commands.entity(e).despawn_recursive();
+    }
+}
+
+
 
 fn create_chunk(
     commands: &mut Commands,
@@ -38,10 +69,11 @@ fn create_chunk(
             },
             texture: asset_server.load("items/LowerTile.png"),
             transform: Transform::from_scale(Vec3::new(width, height, 1.0))
-                .with_translation(Vec3::new(position_x, position_y, 0.0))
+                .with_translation(Vec3::new(position_x, position_y, 0.1))
                 .with_rotation(Quat::from_rotation_z(rotation.to_radians())),
             ..default()
         })
+        .insert(LevelComponent)
         .id();
 
     if add_collider {
@@ -68,12 +100,13 @@ fn setup_map(
         material: materials.add(ColorMaterial::from(Color::hex("0C1E21").unwrap())),
         transform: Transform::from_xyz(WORLD_SIZE.x / 2.0, WORLD_SIZE.y / 2.0, 0.0),
         ..default()
-    });
+    }).insert(LevelComponent);
 
     let fountain_offset = Transform::from_xyz(180.0, 135.0, 1.0);
     commands
         .spawn()
         .insert(Fountain)
+        .insert(LevelComponent)
         .insert_bundle(MaterialMesh2dBundle {
             mesh: meshes
                 .add(Mesh::from(shape::Quad::new(Vec2::new(200.0, 200.0))))
@@ -87,6 +120,7 @@ fn setup_map(
     let base_offset = Transform::from_xyz(1500.0, 1800.0, 0.0);
     commands
         .spawn()
+        .insert(LevelComponent)
         .insert(Base)
         .insert_bundle(TransformBundle::from(base_offset));
 
