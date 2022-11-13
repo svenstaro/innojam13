@@ -9,7 +9,7 @@ pub struct EnemyPlugin;
 use rand::Rng;
 
 use crate::{
-    game_state::AppState, level::Fountain, pathfinding::PathfindingAgent,
+    game_state::AppState, level::{Fountain, LevelComponent}, pathfinding::PathfindingAgent,
     polishing_constants::ENEMY_STRENGTH, MainCamera,
 };
 
@@ -143,6 +143,7 @@ fn spawn_enemy_at(commands: &mut Commands, asset_server: &Res<AssetServer>, pos:
         .insert(Enemy)
         .insert(EnemyType::Grunt)
         .insert(PathfindingAgent::new(ENEMY_STRENGTH))
+        .insert(LevelComponent)
         .insert_bundle(SpriteBundle {
             sprite: Sprite {
                 custom_size: Some(Vec2::splat(1.0)),

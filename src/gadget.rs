@@ -81,6 +81,7 @@ fn handle_spawn_cannons(
                 })
                 // .insert(cannon_component)
                 .insert(Gadget { is_placed: false })
+                .insert(LevelComponent)
                 .insert(GadgetPart { is_placed: false });
         }
     };
