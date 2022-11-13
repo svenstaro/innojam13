@@ -8,12 +8,44 @@ pub struct EnemyPlugin;
 
 use rand::Rng;
 
-use crate::{
-    input::get_world_cursor_pos, level::Fountain, pathfinding::PathfindingAgent, MainCamera,
-};
+use crate::{game_state::AppState, level::Fountain, pathfinding::PathfindingAgent, MainCamera};
+
+#[derive(Debug, Clone)]
+pub struct WaveConfig {
+    count_remaining: u32,
+    timer: Timer,
+}
+
+impl Default for WaveConfig {
+    fn default() -> Self {
+        Self {
+            count_remaining: 3,
+            timer: Timer::new(Duration::from_secs(2), true),
+        }
+    }
+}
+
+impl WaveConfig {
+    fn new(count: u32) -> Self {
+        WaveConfig {
+            count_remaining: count,
+            timer: Timer::new(Duration::from_secs(2), true),
+        }
+    }
+}
 
 #[derive(Debug, Default)]
-pub struct SpawnWaveEvent;
+pub struct SpawnWaveEvent {
+    wave_cfg: WaveConfig,
+}
+
+impl SpawnWaveEvent {
+    fn new(count: u32) -> Self {
+        SpawnWaveEvent {
+            wave_cfg: WaveConfig::new(count),
+        }
+    }
+}
 
 fn rand_f32(l: f32, u: f32) -> f32 {
     rand::thread_rng().gen_range(l..u)
@@ -22,8 +54,9 @@ fn rand_f32(l: f32, u: f32) -> f32 {
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<SpawnWaveEvent>()
-            .add_system(spawn_new_wave_on_event);
-
+        .init_resource::<WaveConfig>()
+            .add_system(spawn_new_wave_on_event)
+            .add_system_set(SystemSet::on_update(AppState::Attack).with_system(check_for_spawn));
         // Enemy processes.
         // .add_system(fountain_spawns_things);
     }
@@ -42,7 +75,7 @@ enum EnemyType {
 struct Enemy;
 
 fn spawn_new_wave_on_event(
-    spawn_wave_events: EventReader<SpawnWaveEvent>,
+    mut spawn_wave_events: EventReader<SpawnWaveEvent>,
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     fountain_query: Query<&Transform, With<Fountain>>,
@@ -50,18 +83,24 @@ fn spawn_new_wave_on_event(
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
 ) {
     // Play a sound once per frame if a collision occurred.
-    if spawn_wave_events.is_empty() {
-        return;
-    }
-    // This prevents events staying active on the next frame.
-    spawn_wave_events.clear();
-    println!("spawn");
-    let fountain_pos = fountain_query.single().translation;
-    dbg!(fountain_pos);
 
-    let wave_size = 1;
-    for _ in 0..wave_size {
+    for wave_ev in spawn_wave_events.iter() {
+        commands.insert_resource(wave_ev.wave_cfg.clone());
+    }
+}
+
+fn check_for_spawn(
+    mut commands: Commands,
+    mut wave_cfg: ResMut<WaveConfig>,
+    asset_server: Res<AssetServer>,
+    time: Res<Time>,
+    fountain_query: Query<&Transform, With<Fountain>>,
+) {
+    wave_cfg.timer.tick(time.delta());
+    if wave_cfg.count_remaining > 0 && wave_cfg.timer.just_finished(){
+        let fountain_pos = fountain_query.single().translation;
         spawn_enemy_at(&mut commands, &asset_server, fountain_pos, 120.0);
+        wave_cfg.count_remaining -= 1;
     }
 }
 
