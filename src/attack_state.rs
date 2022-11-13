@@ -1,6 +1,6 @@
 use bevy::{math::vec3, prelude::*};
 
-use crate::{AppState, WORLD_SIZE, enemy::SpawnWaveEvent, game_state::WaveControler};
+use crate::{AppState, WORLD_SIZE, enemy::{SpawnWaveEvent, Enemy}, game_state::WaveControler};
 
 #[derive(Component)]
 struct AttackStateCountdown {
@@ -82,10 +82,16 @@ fn cleanup(
     mut commands: Commands,
     mut timer_q: Query<(Entity, &mut AttackStateCountdown)>,
     mut text_q: Query<(Entity, &mut AttackStateText)>,
+    mut enemy_q: Query<Entity, With<Enemy>>,
 ) {
     let (entity, _) = timer_q.single_mut();
     commands.entity(entity).despawn_recursive();
 
     let (entity, _) = text_q.single_mut();
+
     commands.entity(entity).despawn_recursive();
+
+    for entity in enemy_q.iter() {
+        commands.entity(entity).despawn_recursive();
+    }
 }
