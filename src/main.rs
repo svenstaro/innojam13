@@ -7,7 +7,7 @@ use bevy_rapier2d::prelude::*;
 use build_state::BuildStatePlugin;
 use enemy::{EnemyPlugin, SpawnWaveEvent};
 use game_state::{AppState, GameStatePlugin};
-use main_menu::MainMenuPlugin;
+use menu::MainMenuPlugin;
 
 use gadget::GadgetPlugin;
 use input::InputPlugin as GameInputPlugin;
@@ -23,7 +23,7 @@ mod gadget;
 mod game_state;
 mod input;
 mod level;
-mod main_menu;
+mod menu;
 mod pathfinding;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Component)]
