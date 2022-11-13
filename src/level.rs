@@ -140,7 +140,7 @@ fn setup_map(
             ..default()
         });
 
-    let base_offset = Transform::from_xyz(1500.0, 1885.0, 0.06);
+    let base_offset = Transform::from_xyz(1700.0, 1885.0, 0.06);
     commands
         .spawn()
         .insert(LevelComponent)

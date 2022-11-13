@@ -87,6 +87,7 @@ fn setup(
         })
         .insert(AttackStateCountdown {
             countdown: ATTACK_COUNTDOWN,
+            //oben rechts
         });
 }
 
