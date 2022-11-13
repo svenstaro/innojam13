@@ -1,6 +1,8 @@
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use bevy_rapier2d::prelude::*;
 
+use crate::WORLD_SIZE;
+
 pub struct LevelPlugin;
 
 #[derive(Debug, Default, Component)]
@@ -54,14 +56,6 @@ fn setup_map(
     let window_width = window.width() as f32;
     let window_height = window.height() as f32;
 
-    // Create the ground.
-    // commands
-    //     .spawn()
-    //     .insert(Collider::cuboid(500.0, 100.0))
-    //     .insert_bundle(TransformBundle::from(Transform::from_xyz(
-    //         1500.0, 200.0, 0.0,
-    //     )));
-
     let fountain_offset = Transform::from_xyz(
         180.0, 
         135.0,
@@ -89,6 +83,16 @@ fn setup_map(
         .spawn()
         .insert(Base)
         .insert_bundle(TransformBundle::from(base_offset));
+
+    // Colliders around the map to prevent eveything from leaving the map
+    // bottom
+    create_chunk(&mut commands, WORLD_SIZE.0, 100.0, 0.0, -100.0, 0.0, &mut meshes, &mut materials, true);
+    //top
+    create_chunk(&mut commands, WORLD_SIZE.0, 100.0, 0.0, WORLD_SIZE.1 + 100.0, 0.0, &mut meshes, &mut materials, true);
+    //left
+    create_chunk(&mut commands, 100.0, WORLD_SIZE.1, -200.0, WORLD_SIZE.1, 0.0, &mut meshes, &mut materials, true);
+    //right
+    create_chunk(&mut commands, 100.0,WORLD_SIZE.1 , WORLD_SIZE.0 + 200.0, 0.0, 0.0, &mut meshes, &mut materials, true);
 
     // ground
     create_chunk(&mut commands, 1600.0, 35.0, 1600.0, 50.0, 0.0, &mut meshes, &mut materials, true);

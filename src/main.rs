@@ -27,7 +27,7 @@ mod pathfinding;
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Component)]
 pub struct MainCamera;
 
-const WORLD_SIZE: (f32, f32) = (3400.0, 2000.0);
+pub const WORLD_SIZE: (f32, f32) = (3400.0, 2000.0);
 const PIXELS_PER_METER: f32 = 100.0;
 
 fn main() {
