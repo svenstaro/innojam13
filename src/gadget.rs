@@ -24,10 +24,12 @@ pub struct CannonGadget {
     shots_per_second: f32,
 }
 
+const SNAP_ON_DIST: f32 = 300.0;
+
 impl Plugin for GadgetPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<SpawnCannonGadgetEvent>()
-            .add_system(shoot_water_system)
+            .add_system(shoot_water)
             .add_system(on_gadget_placment_status_change)
             .add_system(handle_spawn_cannons)
             .add_system(update_gadget_placement);
@@ -50,26 +52,27 @@ fn handle_spawn_cannons(
     spawn_cannon_events.clear();
 
     if let Some(position) = get_world_cursor_pos(windows, camera_q) {
-        //TODO: grid for gadget placement?
-        let cannon_component = CannonGadget {
-            emission_strength: 10.0,
-            shots_per_second: 10.0,
-        };
+        if let Some(position) = snap_to_surface(position) {
+            let cannon_component = CannonGadget {
+                emission_strength: 10.0,
+                shots_per_second: 10.0,
+            };
 
-        let barrel_entity = commands
-            .spawn_bundle(MaterialMesh2dBundle {
-                mesh: meshes
-                    .add(Mesh::from(shape::Quad::new(Vec2::new(0.3, 1.0))))
-                    .into(),
-                material: materials.add(ColorMaterial::from(Color::BLUE)),
-                transform: Transform::from_xyz(position.x, position.y, 1.0)
-                    .with_scale(Vec3::splat(200.0)),
-                ..default()
-            })
-            .insert(cannon_component)
-            .insert(Gadget { is_placed: false })
-            .insert(GadgetPart { is_placed: false })
-            .id();
+            let barrel_entity = commands
+                .spawn_bundle(MaterialMesh2dBundle {
+                    mesh: meshes
+                        .add(Mesh::from(shape::Quad::new(Vec2::new(0.3, 1.0))))
+                        .into(),
+                    material: materials.add(ColorMaterial::from(Color::BLUE)),
+                    transform: Transform::from_xyz(position.x, position.y, 1.0)
+                        .with_scale(Vec3::splat(200.0)),
+                    ..default()
+                })
+                .insert(cannon_component)
+                .insert(Gadget { is_placed: false })
+                .insert(GadgetPart { is_placed: false })
+                .id();
+        }
     };
 }
 
@@ -86,6 +89,7 @@ fn update_gadget_placement(
                 gadget.is_placed = true;
             }
             if !gadget.is_placed {
+                let position = snap_to_surface(position);
                 gadget_transform.translation = Vec3::new(position.x, position.y, 1.0);
             }
         }
@@ -102,6 +106,49 @@ fn on_gadget_placment_status_change(
             material.color.set_a(alpha);
         }
     }
+}
+
+fn snap_to_surface(sample_point: Vec2) -> Option<Vec2> {
+    struct Edge {
+        left: Vec2,
+        right: Vec2,
+    }
+
+    let snap_edges: Vec<Edge> = vec![
+        Edge {
+            left: Vec2::new(35.0, 185.0),
+            right: Vec2::new(3165.0, 185.0),
+        },
+        Edge {
+            left: Vec2::new(35.0, 835.0),
+            right: Vec2::new(650.0, 835.0),
+        },
+        Edge {
+            left: Vec2::new(400.0, 1430.0),
+            right: Vec2::new(1100.0, 1430.0),
+        },
+        Edge {
+            left: Vec2::new(1100.0, 1820.0),
+            right: Vec2::new(2000.0, 1820.0),
+        },
+    ];
+
+    for edge in snap_edges {
+        if sample_point.x < edge.left.x || sample_point.x > edge.right.x {
+            continue;
+        }
+
+        let t = (edge.right.x - sample_point.x) / (edge.right.x - edge.left.x);
+
+        let snap_on_target = edge.right.lerp(edge.left, t);
+        let dist = (sample_point.y - snap_on_target.y).abs();
+        if dist < SNAP_ON_DIST {
+            dbg!(t);
+            return Some(snap_on_target);
+        }
+    }
+
+    None
 }
 
 fn shoot_water_system(
