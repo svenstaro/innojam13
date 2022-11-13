@@ -8,7 +8,9 @@ pub struct EnemyPlugin;
 
 use rand::Rng;
 
-use crate::{level::Fountain, pathfinding::PathfindingAgent, input::get_world_cursor_pos, MainCamera};
+use crate::{
+    input::get_world_cursor_pos, level::Fountain, pathfinding::PathfindingAgent, MainCamera,
+};
 
 #[derive(Debug, Default)]
 pub struct SpawnWaveEvent;
@@ -19,12 +21,11 @@ fn rand_f32(l: f32, u: f32) -> f32 {
 
 impl Plugin for EnemyPlugin {
     fn build(&self, app: &mut App) {
-        app
-            .add_event::<SpawnWaveEvent>()
+        app.add_event::<SpawnWaveEvent>()
             .add_system(spawn_new_wave_on_event);
 
-            // Enemy processes.
-            // .add_system(fountain_spawns_things);
+        // Enemy processes.
+        // .add_system(fountain_spawns_things);
     }
 }
 
@@ -44,32 +45,24 @@ fn spawn_new_wave_on_event(
     spawn_wave_events: EventReader<SpawnWaveEvent>,
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut fountain_query: Query<&Transform, With<Fountain>>,
+    fountain_query: Query<&Transform, With<Fountain>>,
     windows: Res<Windows>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
 ) {
-    if let Some(mouse_pos) =  get_world_cursor_pos(windows, camera_q) {
-        // Play a sound once per frame if a collision occurred.
+    // Play a sound once per frame if a collision occurred.
     if spawn_wave_events.is_empty() {
         return;
     }
     // This prevents events staying active on the next frame.
     spawn_wave_events.clear();
-
-    let base_pos = if let Some(fountain) = fountain_query.iter_mut().next().map(|x| x.clone()) {
-        fountain.translation
-    } else {
-        Vec3::new(1000.0, 500.0, 0.0)
-    };
+    println!("spawn");
+    let fountain_pos = fountain_query.single().translation;
+    dbg!(fountain_pos);
 
     let wave_size = 1;
     for _ in 0..wave_size {
-        let offset = Vec3::new(rand_f32(-50.0, 50.0), rand_f32(-50.0, 50.0), 0.0);
-        let pos = base_pos + offset;
-        spawn_enemy_at(&mut commands, &asset_server, Vec3::new(mouse_pos.x, mouse_pos.y, 0.0), 120.0);
+        spawn_enemy_at(&mut commands, &asset_server, fountain_pos, 120.0);
     }
-    }
-    
 }
 
 fn fountain_spawns_things(

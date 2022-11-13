@@ -33,7 +33,7 @@ fn create_chunk(
                 .add(Mesh::from(shape::Quad::new(Vec2::new(width* 2.0, height * 2.0))))
                 .into(),
             material: materials.add(ColorMaterial::from(Color::DARK_GRAY)),
-            transform: Transform::from_xyz(position_x, position_y, 1.0)
+            transform: Transform::from_xyz(position_x, position_y, 0.9)
                 .with_rotation(Quat::from_rotation_z(rotation.to_radians())),
             ..default()
         }).id();
@@ -62,19 +62,24 @@ fn setup_map(
     //         1500.0, 200.0, 0.0,
     //     )));
 
-    let fountain = Collider::cuboid(50.0, 50.0);
     let fountain_offset = Transform::from_xyz(
-        -(window_width / 2.0 - 50.0 - 10.0),
-        -window_height / 2.0 + 100.0 + 50.0 + 10.0,
-        0.0,
+        180.0, 
+        135.0,
+        1.0,
     );
     commands
         .spawn()
         .insert(Fountain)
-        .insert(fountain)
-        .insert_bundle(TransformBundle::from(fountain_offset));
+        .insert_bundle(MaterialMesh2dBundle {
+            mesh: meshes
+                .add(Mesh::from(shape::Quad::new(Vec2::new( 200.0, 200.0))))
+                .into(),
+            material: materials.add(ColorMaterial::from(Color::RED)),
+            transform: fountain_offset,
+            visibility: Visibility {is_visible: false},
+            ..default()
+        });
 
-    let base = Collider::cuboid(50.0, 50.0);
     let base_offset = Transform::from_xyz(
         window_width / 2.0 - 50.0 - 10.0,
         -window_height / 2.0 + 100.0 + 50.0 + 10.0,
@@ -83,7 +88,6 @@ fn setup_map(
     commands
         .spawn()
         .insert(Base)
-        .insert(base)
         .insert_bundle(TransformBundle::from(base_offset));
 
     // ground
@@ -159,22 +163,16 @@ fn setup_map(
 
 #[warn(dead_code)]
 fn spawn_fountain(mut commands: Commands) {
-    let fountain = Collider::cuboid(50.0, 50.0);
     let fountain_offset = Transform::from_xyz(100.0, 100.0, 0.0);
     commands
         .spawn()
         .insert(Fountain)
-        .insert(fountain)
-        .insert(CollisionGroups::new(Group::GROUP_31, Group::NONE))
         .insert_bundle(TransformBundle::from(fountain_offset));
 
-    let base = Collider::cuboid(50.0, 50.0);
 
     let base_offset = Transform::from_xyz(1500.0, 500.0, 0.0);
     commands
         .spawn()
         .insert(Base)
-        .insert(base)
-        .insert(CollisionGroups::new(Group::GROUP_31, Group::GROUP_1))
         .insert_bundle(TransformBundle::from(base_offset));
 }
