@@ -5,7 +5,7 @@ use crate::{
     game_state::AppState,
     input::get_world_cursor_pos,
     polishing_constants::{WATER_SIZE, WATER_STRENGTH},
-    MainCamera,
+    MainCamera, level::LevelComponent,
 };
 
 #[derive(Debug, Default)]
@@ -34,7 +34,7 @@ const SNAP_ON_DIST: f32 = 300.0;
 impl Plugin for GadgetPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<SpawnCannonGadgetEvent>()
-            .add_system(shoot_water_system)
+            // .add_system(shoot_water_system)
             .add_system(on_gadget_placment_status_change)
             .add_system(handle_spawn_cannons)
             .add_system(update_gadget_placement);
@@ -203,6 +203,7 @@ pub fn shoot_water(
             impulse: (target_pos - shoot_pos).truncate().normalize() * WATER_STRENGTH,
             torque_impulse: 0.0,
         })
+        .insert(LevelComponent)
         .insert_bundle(MaterialMesh2dBundle {
             mesh: meshes.add(Mesh::from(shape::Circle::default())).into(),
             transform: Transform::from_xyz(shoot_pos.x, shoot_pos.y, 0.96)
