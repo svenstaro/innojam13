@@ -1,5 +1,5 @@
 use attack_state::AttackStatePlugin;
-use bevy::{math::vec3, prelude::*};
+use bevy::{audio::AudioPlugin, math::vec3, prelude::*};
 
 use bevy_easings::EasingsPlugin;
 use bevy_rapier2d::prelude::*;
@@ -46,6 +46,7 @@ fn main() {
         ))
         // .add_plugin(RapierDebugRenderPlugin::default())
         .add_plugin(GameStatePlugin)
+        .add_plugin(AudioPlugin)
         .add_plugin(MainMenuPlugin)
         .add_plugin(BuildStatePlugin)
         .add_plugin(AttackStatePlugin)

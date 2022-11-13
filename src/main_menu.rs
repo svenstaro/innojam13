@@ -1,18 +1,39 @@
+//TODO: rename to menu.rs
+//TODO audio setting
 use bevy::{app::AppExit, prelude::*};
 
 use crate::AppState;
 
 pub struct MainMenuPlugin;
 
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Default)]
+struct MenuData(Option<Entity>);
 #[derive(Component, Debug)]
-struct MainMenuData {
-    ui_root: Entity,
-}
-
+struct Background;
+#[derive(Component, Debug)]
+struct Title;
 #[derive(Component, Debug)]
 enum MenuButton {
     Play,
     Quit,
+}
+
+impl Plugin for MainMenuPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_system(button_press_system)
+            .init_resource::<MenuData>()
+            .add_state(MenuData::default())
+            .add_system_set(
+                SystemSet::on_update(AppState::MainMenu).with_system(button_press_system),
+            )
+            .add_system_set(SystemSet::on_enter(AppState::Intro).with_system(spawn_intro))
+            .add_system_set(
+                SystemSet::on_update(AppState::Intro).with_system(poll_intro_timer_over),
+            ) // or spawn main menu directly?
+            .add_system_set(SystemSet::on_exit(AppState::Intro).with_system(spawn_main_menu))
+            .add_system_set(SystemSet::on_exit(AppState::MainMenu).with_system(despawn_main_menu))
+            .add_system(main_menu_controls);
+    }
 }
 
 fn button_press_system(
@@ -22,24 +43,16 @@ fn button_press_system(
 ) {
     for (interaction, button) in buttons.iter() {
         if *interaction == Interaction::Clicked {
+            dbg!(button);
             match button {
-                MenuButton::Play => state
-                    .set(AppState::Build)
-                    .expect("Couldn't switch state to Build"),
-                MenuButton::Quit => exit.send(AppExit),
-            };
+                MenuButton::Play => {
+                    state.set(AppState::Build);
+                }
+                MenuButton::Quit => {
+                    exit.send(AppExit);
+                }
+            }
         }
-    }
-}
-
-impl Plugin for MainMenuPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_system_set(
-            SystemSet::on_update(AppState::MainMenu).with_system(button_press_system),
-        )
-        .add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(setup))
-        .add_system_set(SystemSet::on_exit(AppState::MainMenu).with_system(cleanup))
-        .add_system(main_menu_controls);
     }
 }
 
@@ -96,6 +109,24 @@ fn button() -> ButtonBundle {
     }
 }
 
+fn intro_text(asset_server: &Res<AssetServer>) -> TextBundle {
+    return TextBundle {
+        style: Style {
+            margin: UiRect::all(Val::Px(10.0)),
+            ..Default::default()
+        },
+        text: Text::from_section(
+            "Splash Mobs",
+            TextStyle {
+                font: asset_server.load("fonts/Oswald-SemiBold.ttf"),
+                font_size: 70.0,
+                color: Color::hex("0C1E21").unwrap(),
+            },
+        ),
+        ..Default::default()
+    };
+}
+
 fn button_text(asset_server: &Res<AssetServer>, label: &str) -> TextBundle {
     return TextBundle {
         style: Style {
@@ -114,7 +145,11 @@ fn button_text(asset_server: &Res<AssetServer>, label: &str) -> TextBundle {
     };
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn spawn_intro(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    mut menu_data: ResMut<MenuData>,
+) {
     let ui_root = commands
         .spawn_bundle(root())
         .with_children(|parent| {
@@ -123,29 +158,55 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                 // left vertical fill (content)
                 parent
                     .spawn_bundle(menu_background())
+                    .insert(Background)
                     .with_children(|parent| {
                         parent
                             .spawn_bundle(button())
                             .with_children(|parent| {
-                                parent.spawn_bundle(button_text(&asset_server, "New Game"));
+                                parent.spawn_bundle(intro_text(&asset_server));
                             })
-                            .insert(MenuButton::Play);
-                        parent
-                            .spawn_bundle(button())
-                            .with_children(|parent| {
-                                parent.spawn_bundle(button_text(&asset_server, "Quit"));
-                            })
-                            .insert(MenuButton::Quit);
+                            .insert(Title);
                     });
             });
         })
         .id();
 
-    commands.insert_resource(MainMenuData { ui_root });
+    *menu_data = MenuData(Some(ui_root));
 }
 
-fn cleanup(mut commands: Commands, menu_data: Res<MainMenuData>) {
-    commands.entity(menu_data.ui_root).despawn_recursive();
+fn poll_intro_timer_over(mut state: ResMut<State<AppState>>, time: Res<Time>) {
+    if time.seconds_since_startup() > 3.0 {
+        state
+            .set(AppState::MainMenu)
+            .expect("Couldn't switch state to MainMenu");
+    }
+}
+
+fn spawn_main_menu(
+    mut commands: Commands,
+    menu_background_query: Query<Entity, With<Background>>,
+    asset_server: Res<AssetServer>,
+) {
+    let entity = menu_background_query.single();
+    commands.entity(entity).despawn_descendants();
+    commands.entity(entity).with_children(|parent| {
+        parent
+            .spawn_bundle(button())
+            .with_children(|parent| {
+                parent.spawn_bundle(button_text(&asset_server, "Play"));
+            })
+            .insert(MenuButton::Play);
+        parent
+            .spawn_bundle(button())
+            .with_children(|parent| {
+                parent.spawn_bundle(button_text(&asset_server, "Quit"));
+            })
+            .insert(MenuButton::Quit);
+    });
+}
+
+fn despawn_main_menu(mut commands: Commands, menu_data: Res<MenuData>) {
+    commands.entity(menu_data.0.unwrap()).despawn_recursive();
 }
 
 fn main_menu_controls(mut keys: ResMut<Input<KeyCode>>, mut app_state: ResMut<State<AppState>>) {
@@ -156,10 +217,26 @@ fn main_menu_controls(mut keys: ResMut<Input<KeyCode>>, mut app_state: ResMut<St
         }
     } else {
         if keys.just_pressed(KeyCode::Escape) {
-            //set some state to add continue button
-            app_state.set(AppState::MainMenu).unwrap();
-            // still needed?
+            // lololol
+            app_state.set(AppState::Intro).unwrap();
             keys.reset(KeyCode::Escape);
         }
     }
 }
+
+// fn audio_system(
+//     mut menu_data_query: Query<&mut MenuData>,
+//     mut audio: ResMut<Audio>,
+//     asset_server: Res<AssetServer>,
+// ) {
+//     let mut menu_data = menu_data_query.single_mut();
+//     let menu_state = &mut menu_data.menu_state;
+
+//     match *menu_state {
+//         MainMenuState::Intro => {
+//             audio.play(asset_server.load("assets/music/menu-start.mp3"));
+//             *menu_state = MainMenuState::MainMenu;
+//         }
+//         MainMenuState::MainMenu => {}
+//     }
+// }

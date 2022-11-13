@@ -8,7 +8,11 @@ const KILL_DIST: f32 = 30.0;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum AppState {
+    Intro,
     MainMenu,
+    // TODO: Settings,
+    // Settings,
+    // Credits,
     Build,
     Attack,
     GameOver,
@@ -21,7 +25,7 @@ pub struct WaveControler {
 
 impl Plugin for GameStatePlugin {
     fn build(&self, app: &mut App) {
-        app.add_state(AppState::MainMenu);
+        app.add_state(AppState::Intro);
         app.add_system(check_game_over);
         app.insert_resource(WaveControler{ wave_size: 1 });
     }
