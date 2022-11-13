@@ -63,7 +63,7 @@ fn setup(
             text: Text::from_section("Attack phase", text_style)
                 .with_alignment(TextAlignment::CENTER),
             transform: Transform {
-                translation: vec3(WORLD_SIZE.x - 380.0, WORLD_SIZE.y - 200.0, 0.97),
+                translation: vec3(WORLD_SIZE.x - 350.0, WORLD_SIZE.y - 200.0, 0.97),
                 ..default()
             },
             ..default()
