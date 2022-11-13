@@ -33,7 +33,7 @@ impl Plugin for GameStatePlugin {
 }
 
 
-fn check_game_over(mut commands: Commands, base_query: Query<&Transform, With<Base>>, enemy_query: Query<&Transform, With<Enemy>>, mut app_state: ResMut<State<AppState>>) {
+fn check_game_over(mut commands: Commands, base_query: Query<&Transform, With<Base>>, enemy_query: Query<&Transform, With<Enemy>>, mut app_state: ResMut<State<AppState>>, mut wave_controler: ResMut<WaveControler>) {
     if base_query.is_empty() {
         return;
     }
@@ -41,7 +41,8 @@ fn check_game_over(mut commands: Commands, base_query: Query<&Transform, With<Ba
     for enemy_trans in enemy_query.iter() {
         let enemy_pos = enemy_trans.translation;
         if base_pos.distance(enemy_pos) < KILL_DIST && *app_state.current() != AppState::GameOver{
-            app_state.set(AppState::GameOver).unwrap();
+            wave_controler.wave_size = 1;
+            app_state.set(AppState::Intro).unwrap();
         }
     }
 }
