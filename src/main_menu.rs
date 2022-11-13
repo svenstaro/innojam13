@@ -219,6 +219,7 @@ fn main_menu_controls(mut keys: ResMut<Input<KeyCode>>, mut app_state: ResMut<St
             keys.reset(KeyCode::Return);
         }
     } else {
+        // todo remember build timer so it is not resetted when going to menu
         if keys.just_pressed(KeyCode::Escape) {
             // lololol
             app_state.set(AppState::Intro).unwrap();
