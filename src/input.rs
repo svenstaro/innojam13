@@ -1,6 +1,6 @@
 use bevy::{prelude::*, render::camera::RenderTarget};
 
-use crate::{MainCamera, enemy::SpawnWaveEvent, gadget::SpawnCannonGadgetEvent};
+use crate::{enemy::SpawnWaveEvent, gadget::SpawnCannonGadgetEvent, MainCamera};
 
 pub struct InputPlugin;
 
@@ -46,14 +46,18 @@ pub fn get_world_cursor_pos(
     }
 }
 
-
-fn debug_keymap(keys: Res<Input<KeyCode>>, mut spawn_wave_events: EventWriter<SpawnWaveEvent>, mut spawn_cannon_events: EventWriter<SpawnCannonGadgetEvent>) {
+fn debug_keymap(
+    keys: Res<Input<KeyCode>>,
+    mouse: Res<Input<MouseButton>>,
+    mut spawn_wave_events: EventWriter<SpawnWaveEvent>,
+    mut spawn_cannon_events: EventWriter<SpawnCannonGadgetEvent>,
+) {
     // Spawn next wave.
     if keys.just_pressed(KeyCode::N) {
         spawn_wave_events.send_default();
     }
 
-    if keys.just_pressed(KeyCode::G) {
+    if mouse.just_pressed(MouseButton::Left) {
         spawn_cannon_events.send_default();
     }
 }

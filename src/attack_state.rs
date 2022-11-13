@@ -63,7 +63,7 @@ fn setup(
             text: Text::from_section("Attack phase", text_style)
                 .with_alignment(TextAlignment::CENTER),
             transform: Transform {
-                translation: vec3(WORLD_SIZE.x / 2.0, WORLD_SIZE.y - 400.0, 0.97),
+                translation: vec3(WORLD_SIZE.x - 380.0, WORLD_SIZE.y - 200.0, 0.97),
                 ..default()
             },
             ..default()
@@ -80,14 +80,13 @@ fn setup(
         .spawn_bundle(Text2dBundle {
             text: Text::from_section("lol", text_style).with_alignment(TextAlignment::TOP_LEFT),
             transform: Transform {
-                translation: vec3(WORLD_SIZE.x / 2.0 - 150.0, WORLD_SIZE.y - 600.0, 0.97),
+                translation: vec3(WORLD_SIZE.x - 280.0, WORLD_SIZE.y - 350.0, 0.97),
                 ..default()
             },
             ..default()
         })
         .insert(AttackStateCountdown {
             countdown: ATTACK_COUNTDOWN,
-            //oben rechts
         });
 }
 
