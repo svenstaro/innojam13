@@ -2,10 +2,11 @@ use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use bevy_rapier2d::prelude::*;
 
 use crate::{
-    game_state::AppState,
+    game_state::{AppState, WaveControler},
     input::get_world_cursor_pos,
+    level::LevelComponent,
     polishing_constants::{WATER_SIZE, WATER_STRENGTH},
-    MainCamera, level::LevelComponent,
+    MainCamera,
 };
 
 #[derive(Debug, Default)]
@@ -50,10 +51,16 @@ fn handle_spawn_cannons(
     windows: Res<Windows>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     asset_server: Res<AssetServer>,
+    cannon_query: Query<Entity, With<Gadget>>,
+    wave_controller: ResMut<WaveControler>,
 ) {
-    if spawn_cannon_events.is_empty() || *app_state.current() != AppState::Build {
+    if spawn_cannon_events.is_empty()
+        || *app_state.current() != AppState::Build
+        || cannon_query.iter().len() > wave_controller.wave_size as usize
+    {
         return;
     }
+
     spawn_cannon_events.clear();
 
     if let Some(position) = get_world_cursor_pos(windows, camera_q) {
