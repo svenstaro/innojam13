@@ -25,7 +25,7 @@ fn attack_system(
         //new variable random value between 0 and 1
         let random_value = rand::random::<f32>();
 
-        if random_value < 0.9 {
+        if random_value < 0.75 {
             continue;
         }
 
@@ -41,6 +41,12 @@ fn attack_system(
                 enemy_position = Some(loc_enemy_pos);
             }
         }
+
+        if min_distance > 1000.0 {
+            //constants
+            continue;
+        }
+
         //now we have the nearest enemy
         // shoot wa'er
         if let Some(pos) = enemy_position {

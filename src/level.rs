@@ -37,7 +37,7 @@ fn create_chunk(
                     height * 2.0,
                 ))))
                 .into(),
-            material: materials.add(ColorMaterial::from(Color::DARK_GRAY)),
+            material: materials.add(ColorMaterial::from(Color::hex("43A8BA").unwrap())),
             transform: Transform::from_xyz(position_x, position_y, 0.9)
                 .with_rotation(Quat::from_rotation_z(rotation.to_radians())),
             ..default()
@@ -91,7 +91,7 @@ fn setup_map(
         .insert(Base)
         .insert_bundle(TransformBundle::from(base_offset));
 
-    // Colliders around the map to prevent eveything from leaving the map
+    // Colliders around the map to prevent everything from leaving the map
     // bottom
     create_chunk(
         &mut commands,

@@ -42,6 +42,7 @@ fn handle_spawn_cannons(
     app_state: Res<State<AppState>>,
     windows: Res<Windows>,
     camera_q: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+    asset_server: &Res<AssetServer>,
 ) {
     if spawn_cannon_events.is_empty() || *app_state.current() != AppState::Build {
         return;
@@ -141,14 +142,14 @@ pub fn shoot_water(
         ))
         .insert(Restitution::coefficient(0.1))
         .insert(ExternalImpulse {
-            impulse: (target_pos - shoot_pos).truncate().normalize() * 10.0,
+            impulse: (target_pos - shoot_pos).truncate().normalize() * 20.0, //constants
             torque_impulse: 0.0,
         })
         .insert_bundle(MaterialMesh2dBundle {
             mesh: meshes.add(Mesh::from(shape::Circle::default())).into(),
             transform: Transform::from_xyz(shoot_pos.x, shoot_pos.y, 0.96)
-                .with_scale(Vec3::splat(10.)),
-            material: materials.add(ColorMaterial::from(Color::BLUE)),
+                .with_scale(Vec3::splat(30.)), //const
+            material: materials.add(ColorMaterial::from(Color::hex("27636E").unwrap())),
             ..default()
         });
 }

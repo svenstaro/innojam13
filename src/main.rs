@@ -30,7 +30,7 @@ mod pathfinding;
 pub struct MainCamera;
 
 pub const WORLD_SIZE: Vec2 = Vec2::new(3400.0, 2000.0);
-const PIXELS_PER_METER: f32 = 100.0;
+const PIXELS_PER_METER: f32 = 200.0; //const
 
 fn main() {
     App::new()
